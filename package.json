@@ -12,8 +12,12 @@
     "@emotion/react": "^11.7.1",
     "@emotion/server": "^11.4.0",
     "@emotion/styled": "^11.6.0",
+    "@mui/icons-material": "^5.4.1",
     "@mui/material": "^5.4.0",
     "@prisma/client": "^3.9.1",
+    "@types/bcrypt": "^5.0.0",
+    "axios": "^0.25.0",
+    "bcrypt": "^5.0.1",
     "clsx": "^1.1.1",
     "eslint": "^8.8.0",
     "formik": "^2.2.9",
@@ -36,10 +40,6 @@
     "xo": "^0.47.0"
   },
   "xo": {
-    "plugin": [
-      "@typescript-eslint"
-    ],
-    "parser": "@typescript-eslint/parser",
     "extends": [
       "xo-react",
       "plugin:@next/next/recommended"
@@ -68,6 +68,14 @@
             "camelCase",
             "PascalCase"
           ]
+        }
+      ],
+      "import/extensions": [
+        "error",
+        "ignorePackages",
+        {
+          "ts": "never",
+          "tsx": "never"
         }
       ]
     },
