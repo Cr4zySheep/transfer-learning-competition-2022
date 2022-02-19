@@ -1,3 +1,4 @@
+import process from 'node:process';
 import {Prisma, PrismaClient} from '@prisma/client';
 import {NextApiRequest, NextApiResponse} from 'next';
 import bcrypt from 'bcrypt';
@@ -39,6 +40,25 @@ const prisma = new PrismaClient();
 //     }
 //   }
 // }
+
+async function getAllTeams(response: NextApiResponse) {
+	const teams = await prisma.team
+		.findMany({include: {members: true}})
+		.then((data) =>
+			data.map(({password, ...team}) => ({
+				...team,
+				createdAt: team.createdAt.toISOString(),
+				updatedAt: team.updatedAt.toISOString(),
+				members: team.members.map((member) => ({
+					...member,
+					createdAt: member.createdAt.toISOString(),
+					updatedAt: member.updatedAt.toISOString(),
+				})),
+			})),
+		);
+
+	response.status(200).send(teams);
+}
 
 function isFirstYearStudent(member: TeamMemberRegistration) {
 	return member.isStudent === 'YES' && member.yearOfStudy === '1A';
@@ -87,7 +107,12 @@ async function register(data: TeamRegistration, response: NextApiResponse) {
 async function handler(request: NextApiRequest, response: NextApiResponse) {
 	switch (request.method) {
 		case 'GET':
-			// Await getAllUsers(res);
+			if (request.query.password === process.env.ADMIN_PASSWORD) {
+				await getAllTeams(response);
+			} else {
+				response.status(403).send(undefined);
+			}
+
 			break;
 
 		case 'POST':

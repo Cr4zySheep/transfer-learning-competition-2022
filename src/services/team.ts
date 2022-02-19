@@ -6,8 +6,10 @@ import {TeamWithMembers} from 'types';
 
 const API_URL = '/api/team';
 
-export async function getAll() {
-	return axios.get<TeamWithMembers>(API_URL).then((response) => response.data);
+export async function getAll(password: string) {
+	return axios
+		.get<TeamWithMembers[]>(API_URL, {params: {password}})
+		.then((response) => response.data);
 }
 
 export async function register(team: TeamRegistration) {

@@ -1,14 +1,61 @@
-import React from 'react';
+import React, {useState} from 'react';
 import type {NextPage} from 'next';
-import {Container, Typography} from '@mui/material';
+import {Button, Container, Grid, Typography} from '@mui/material';
 import {TeamWithMembers} from 'types';
-import {PrismaClient} from '@prisma/client';
+import TextField from 'components/TextField';
+import {Form, Formik} from 'formik';
+import {getAll} from 'services/team';
 
-interface AdminPageProps {
-	teams: TeamWithMembers[];
-}
+const AdminPage: NextPage = () => {
+	const [teams, setTeams] = useState<TeamWithMembers[]>();
 
-const AdminPage: NextPage<AdminPageProps> = ({teams}) => {
+	if (!teams)
+		return (
+			<Container>
+				<Typography gutterBottom variant="h1">
+					Admin panel
+				</Typography>
+
+				<Formik
+					initialValues={{password: ''}}
+					onSubmit={async ({password}, {setStatus}) => {
+						return getAll(password)
+							.then(setTeams)
+							.catch(() => {
+								setStatus('Password incorrect.');
+							});
+					}}
+				>
+					{({status}) => (
+						<Form>
+							<Grid container spacing={2}>
+								<Grid item xs={12} md={6}>
+									<TextField
+										fullWidth
+										name="password"
+										label="Password"
+										variant="standard"
+										type="password"
+									/>
+								</Grid>
+
+								<Grid item xs={12} md={6}>
+									<Button fullWidth type="submit" variant="contained">
+										Access the admin panel
+									</Button>
+								</Grid>
+							</Grid>
+							{Boolean(status) && (
+								<Typography color="error" variant="caption">
+									{status}
+								</Typography>
+							)}
+						</Form>
+					)}
+				</Formik>
+			</Container>
+		);
+
 	return (
 		<Container>
 			<Typography variant="h4">Liste des équipes</Typography>
@@ -45,26 +92,3 @@ const AdminPage: NextPage<AdminPageProps> = ({teams}) => {
 };
 
 export default AdminPage;
-
-export async function getServerSideProps() {
-	const prisma = new PrismaClient();
-
-	const teams = await prisma.team
-		.findMany({include: {members: true}})
-		.then((data) =>
-			data.map(({password, ...team}) => ({
-				...team,
-				createdAt: team.createdAt.toISOString(),
-				updatedAt: team.updatedAt.toISOString(),
-				members: team.members.map((member) => ({
-					...member,
-					createdAt: member.createdAt.toISOString(),
-					updatedAt: member.updatedAt.toISOString(),
-				})),
-			})),
-		);
-
-	return {
-		props: {teams}, // Will be passed to the page component as props
-	};
-}
