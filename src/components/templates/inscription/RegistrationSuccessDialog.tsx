@@ -19,10 +19,11 @@ const RegistrationSuccessDialog = ({open}: RegistrationSuccessDialogProps) => {
 			<DialogTitle>Registration successfull!</DialogTitle>
 			<DialogContent>
 				<DialogContentText>
-					You can read carefully the information about the competition by
-					clicking the button below.
+					You can now read more carefully the information about the competition
+					by clicking the button below.
 				</DialogContentText>
 			</DialogContent>
+
 			<DialogActions>
 				<Button
 					fullWidth

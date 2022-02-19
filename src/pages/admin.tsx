@@ -16,14 +16,14 @@ const AdminPage: NextPage<AdminPageProps> = ({teams}) => {
 			<ul>
 				{teams.map((team) => (
 					<li key={team.id}>
-						Equipe n°{team.id} {team.firstYearOnly && ' - First year only'}
+						Team #{team.id} {team.firstYearOnly && ' - First year only'}
 						<br />
-						Membres:
+						Members:
 						<ul>
 							{team.members.map((member) => (
 								<li key={member.id}>
 									{member.firstName} {member.lastName.toUpperCase()} (
-									{member.email}) {member.isStudent && `- étudiant`}
+									{member.email}) {member.isStudent && `- student`}
 									<br />
 									{member.isStudent ? (
 										<>

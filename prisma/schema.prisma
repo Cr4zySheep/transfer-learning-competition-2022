@@ -28,7 +28,7 @@ model TeamMember {
   updatedAt   DateTime @updatedAt
   firstName   String
   lastName    String
-  email       String
+  email       String   @unique
   isStudent   Boolean  @default(true)
   university  String?
   yearOfStudy String?

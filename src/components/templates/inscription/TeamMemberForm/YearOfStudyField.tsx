@@ -18,6 +18,7 @@ const YearOfStudyField = ({prefix}: {prefix: string}) => {
 				<MenuItem value="1A">First year</MenuItem>
 				<MenuItem value="2A">Second year</MenuItem>
 				<MenuItem value="3A">Third year</MenuItem>
+				<MenuItem value="GAP_YEAR">Gap year</MenuItem>
 			</Select>
 			{meta.touched && Boolean(meta.error) && (
 				<Typography variant="caption" color="error">

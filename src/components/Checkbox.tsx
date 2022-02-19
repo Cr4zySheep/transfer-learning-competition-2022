@@ -1,6 +1,11 @@
 import React from 'react';
 import {useField} from 'formik';
-import {Checkbox, CheckboxProps, FormControlLabel} from '@mui/material';
+import {
+	Checkbox,
+	CheckboxProps,
+	FormControlLabel,
+	Typography,
+} from '@mui/material';
 
 interface CheckboxFieldProps extends CheckboxProps {
 	/**
@@ -18,13 +23,24 @@ interface CheckboxFieldProps extends CheckboxProps {
  * A checkbox with a label (integrated with Formik).
  */
 const CheckboxField = ({name, label = '', ...props}: CheckboxFieldProps) => {
-	const [field] = useField<boolean>(name);
+	const [field, meta] = useField<boolean>(name);
 
 	return (
-		<FormControlLabel
-			control={<Checkbox checked={field.value} {...field} {...props} />}
-			label={label}
-		/>
+		<>
+			<FormControlLabel
+				control={<Checkbox checked={field.value} {...field} {...props} />}
+				label={label}
+			/>
+			{meta.touched && Boolean(meta.error) && (
+				<Typography
+					color="error"
+					variant="caption"
+					sx={{display: 'block', marginLeft: 4}}
+				>
+					{meta.error}
+				</Typography>
+			)}
+		</>
 	);
 };
 

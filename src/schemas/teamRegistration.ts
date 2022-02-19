@@ -42,7 +42,10 @@ const teamRegistration = object({
 	acceptRules: bool()
 		.required()
 		.oneOf([true], 'You have to accept the rules in order to register.'),
-	acceptDataTreatment: bool().oneOf([true], ''),
+	acceptDataTreatment: bool().oneOf(
+		[true],
+		"You need to accept, otherwise you can't take part in the competition.",
+	),
 });
 
 export default teamRegistration;

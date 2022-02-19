@@ -36,7 +36,7 @@ const TeamMemberForm = ({index, remove}: TeamMemberFormProps) => {
 		<Grid item xs={12} md={6}>
 			<Paper sx={(theme) => ({padding: theme.spacing(1)})}>
 				<Typography gutterBottom fontWeight="bold">
-					Member n°{index + 1}
+					Member #{index + 1}
 				</Typography>
 				<Grid container spacing={2}>
 					<Grid item xs={12} md={6}>

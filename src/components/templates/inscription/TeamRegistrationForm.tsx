@@ -60,6 +60,13 @@ const TeamRegistrationForm = () => {
 		values: FormData,
 		{setErrors, setStatus}: FormikHelpers<FormData>,
 	) => {
+		// Check for duplicate email
+		const emails = new Set(values.members.map((member) => member.email));
+		if (emails.size !== values.members.length) {
+			setStatus('Each member should have a different email address.');
+			return Promise.resolve();
+		}
+
 		for (const member of values.members) {
 			// Is student
 			if (member.isStudent === 'YES') {
@@ -90,7 +97,10 @@ const TeamRegistrationForm = () => {
 						if (typeof errorData === 'object') {
 							setErrors(yupToFormErrors(error.response.data));
 						} else if (typeof errorData === 'string') {
-							setStatus(errorData);
+							// SetStatus(errorData);
+							setStatus(
+								'At least one of these email addresses is already used by another team.',
+							);
 						} else
 							console.error('An error occured with unknown type :', errorData);
 					}
@@ -147,12 +157,19 @@ const TeamRegistrationForm = () => {
 							);
 						}}
 					</FieldArray>
+
+					{Boolean(status) && (
+						<Typography gutterBottom color="error">
+							{status}
+						</Typography>
+					)}
+
 					<Typography gutterBottom variant="h4">
 						Credentials
 					</Typography>
 					<Typography paragraph>
-						This password is <b>common to your team</b>. In order to access to
-						your team account later on, you will need to sign in using an email
+						This password is <b>common to your team</b>. In order to access your
+						team account later on, you will need to sign in using an email
 						address used by one member of your team and this password.
 					</Typography>
 					<Box sx={(theme) => ({width: '50%', marginBottom: theme.spacing(2)})}>
@@ -166,44 +183,40 @@ const TeamRegistrationForm = () => {
 							Your password should be at least 8 characters long.
 						</Typography>
 					</Box>
-					{Boolean(status) && (
-						<Typography gutterBottom color="error">
-							{status}
-						</Typography>
-					)}
 					<Divider variant="middle" />
+
 					<Typography sx={(theme) => ({marginTop: theme.spacing(2)})}>
-						If every team member is a first year student, then you will take
-						part of competition only against other first year students.
-						{/* Si tous les membres de l&apos;équipe sont des étudiants de premières
-						années, alors vous ne participirez à la compétition que contre des
-						premières années. */}
+						If every team member is a first year student at CentraleSupélec,
+						Centrale Marseille or Centrale Lille, then you will take part in the
+						competition in the first year students&apos; leaderboard.
 					</Typography>
-					<CheckboxField
-						name="acceptRules"
-						label={
-							<>
-								As a team, you have read and you accept the{' '}
-								<Link href="https://google.fr" target="__blank">
-									rules of the competition
-								</Link>
-								.
-							</>
-						}
-					/>
-					<br />
-					<CheckboxField
-						name="acceptDataTreatment"
-						label={
-							<>
-								(TO REPLACE) As a team, you accept that{' '}
-								<Link href="https://google.fr" target="__blank">
-									we are going to sell your data
-								</Link>
-								.
-							</>
-						}
-					/>
+					<Grid container direction="column">
+						<CheckboxField
+							name="acceptRules"
+							label={
+								<>
+									As a team, you have read and you accept the{' '}
+									<Link href="https://google.fr" target="__blank">
+										rules of the competition
+									</Link>
+									.
+								</>
+							}
+						/>
+						<CheckboxField
+							name="acceptDataTreatment"
+							label={
+								<>
+									(TO REPLACE) As a team, you accept that{' '}
+									<Link href="https://google.fr" target="__blank">
+										we are going to sell your data
+									</Link>
+									.
+								</>
+							}
+						/>
+					</Grid>
+
 					<Button
 						fullWidth
 						type="submit"

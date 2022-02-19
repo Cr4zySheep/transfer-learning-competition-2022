@@ -1,4 +1,4 @@
-import {PrismaClient} from '@prisma/client';
+import {Prisma, PrismaClient} from '@prisma/client';
 import {NextApiRequest, NextApiResponse} from 'next';
 import bcrypt from 'bcrypt';
 
@@ -53,24 +53,35 @@ async function register(data: TeamRegistration, response: NextApiResponse) {
 	const password = await bcrypt.hash(data.password, 10);
 
 	// Prevent return the hashed password
-	const {password: _, ...team} = await prisma.team.create({
-		data: {
-			...data,
-			firstYearOnly: data.members.every((member) => isFirstYearStudent(member)),
-			password,
-			members: {
-				createMany: {
-					data: data.members.map((member) => ({
-						...member,
-						isStudent: member.isStudent === 'YES',
-					})),
+	try {
+		const {password: _, ...team} = await prisma.team.create({
+			data: {
+				...data,
+				firstYearOnly: data.members.every((member) =>
+					isFirstYearStudent(member),
+				),
+				password,
+				members: {
+					createMany: {
+						data: data.members.map((member) => ({
+							...member,
+							isStudent: member.isStudent === 'YES',
+						})),
+					},
 				},
 			},
-		},
-		include: {members: true},
-	});
+			include: {members: true},
+		});
 
-	response.status(201).json(team);
+		response.status(201).json(team);
+	} catch (error: unknown) {
+		if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			// TODO: Better managment of Prisma error, using yup.ValidationError for example
+			response.status(400).end(error.message);
+		} else {
+			throw error;
+		}
+	}
 }
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {
