@@ -16,6 +16,7 @@ import {register} from 'services/team';
 
 import TextField from 'components/TextField';
 import CheckboxField from 'components/Checkbox';
+import {bool, object} from 'yup';
 import TeamMemberForm from './TeamMemberForm';
 import RegistrationSuccessDialog from './RegistrationSuccessDialog';
 
@@ -35,6 +36,7 @@ const initialValues = {
 	password: '',
 	acceptRules: false,
 	acceptDataTreatment: false,
+	awarenessCheck: false,
 };
 
 interface FormData {
@@ -51,13 +53,14 @@ interface FormData {
 	password: string;
 	acceptRules: boolean;
 	acceptDataTreatment: boolean;
+	awarenessCheck: boolean;
 }
 
 const TeamRegistrationForm = () => {
 	const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
 	const handleSubmit = async (
-		values: FormData,
+		{awarenessCheck, ...values}: FormData,
 		{setErrors, setStatus}: FormikHelpers<FormData>,
 	) => {
 		// Check for duplicate email
@@ -111,7 +114,11 @@ const TeamRegistrationForm = () => {
 	return (
 		<Formik
 			initialValues={initialValues}
-			validationSchema={schema}
+			validationSchema={schema.concat(
+				object({
+					awarenessCheck: bool().required().oneOf([true], 'Read the text!'),
+				}),
+			)}
 			onSubmit={handleSubmit}
 		>
 			{({values, status}) => (
@@ -195,21 +202,48 @@ const TeamRegistrationForm = () => {
 							name="acceptRules"
 							label={
 								<>
-									As a team, you have read and you accept the{' '}
-									<Link href="https://google.fr" target="__blank">
-										rules of the competition
+									The whole team is aware that the opening ceremony where all
+									useful information will be revealed is on March 8th, 20:30
+									(Paris time) and can be joined using the link{' '}
+									<Link
+										href="https://webconf.centrale-marseille.fr/transferlearning"
+										target="__blank"
+									>
+										https://webconf.centrale-marseille.fr/transferlearning
 									</Link>
 									.
 								</>
 							}
 						/>
+
+						<CheckboxField
+							name="awarenessCheck"
+							label={
+								<>
+									The whole team is aware that the rules of the competition and
+									other necessary information will be available after March 8th
+									at this address:{' '}
+									<Link
+										href="https://transfer-learning.org/info"
+										target="__blank"
+									>
+										https://transfer-learning.org/info
+									</Link>
+									.
+								</>
+							}
+						/>
+
 						<CheckboxField
 							name="acceptDataTreatment"
 							label={
 								<>
-									(TO REPLACE) As a team, you accept that{' '}
-									<Link href="https://google.fr" target="__blank">
-										we are going to sell your data
+									The whole team accepts our{' '}
+									<Link
+										href="https://transfer-learning.org/data"
+										target="__blank"
+									>
+										data policy
 									</Link>
 									.
 								</>
