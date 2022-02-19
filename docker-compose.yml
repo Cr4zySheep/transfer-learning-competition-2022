@@ -1,18 +1,36 @@
 version: '3.7'
 
 services:
+  app:
+    image: transfer-learning-competition-app:$VERSION
+    restart: always
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@database:3306/${MYSQL_DATABASE}
+      - ADMIN_PASSWORD=SuperPasswordSecret
+    ports:
+      - 80:3000
+    depends_on:
+      - database
+      - migration
+
   database:
     image: mysql:5.7
+    restart: always
     environment:
       - MYSQL_DATABASE
       - MYSQL_USER
       - MYSQL_PASSWORD
       - MYSQL_ROOT_PASSWORD
-    ports:
-      - '3306:3306'
-#     volumes:
-#       - my-db:/var/lib/mysql
+    volumes:
+      - database:/var/lib/mysql
+
+  migration:
+    image: migration-app:$VERSION
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@database:3306/${MYSQL_DATABASE}
+    depends_on:
+      - database
 
 # Names our volume
-# volumes:
-#   my-db:
+volumes:
+  database:

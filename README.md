@@ -36,3 +36,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 ## Misc.
 
 You will also need to run `yarn husky install`.
+
+To build the image: `docker build -t transfer-learning-competition-app:0.1 .` (Don't forget to update the version).
+
+To build the image: `docker build -t migration-app:0.1 .` (Don't forget to update the version).
