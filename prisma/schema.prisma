@@ -35,6 +35,11 @@ model TeamMember {
   companyName String?
   companyRole String?
 
+  // Fields used for email validation
+  emailValidated       DateTime?
+  emailValidationToken String?
+
+
   team   Team @relation(fields: [teamId], references: [id])
   teamId Int
 }

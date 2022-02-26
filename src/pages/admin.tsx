@@ -5,6 +5,7 @@ import {TeamWithMembers} from 'types';
 import TextField from 'components/TextField';
 import {Form, Formik} from 'formik';
 import {getAll} from 'services/team';
+import {generateNewEmailValidationToken} from 'services/admin';
 
 const AdminPage: NextPage = () => {
 	const [teams, setTeams] = useState<TeamWithMembers[]>();
@@ -56,6 +57,21 @@ const AdminPage: NextPage = () => {
 			</Container>
 		);
 
+	const handleGenerateNewToken = async (id: number) => {
+		await generateNewEmailValidationToken(id).then((updatedMember) => {
+			setTeams((teams) =>
+				teams?.map((team) => ({
+					...team,
+					members: team.members.map((member) =>
+						member.id === id ? updatedMember : member,
+					),
+				})),
+			);
+		});
+	};
+
+	// TODO: Add way to generate text to send for member to validate their email address or better, a button "Resend an email"
+
 	return (
 		<Container>
 			<Typography variant="h4">Liste des équipes</Typography>
@@ -71,6 +87,25 @@ const AdminPage: NextPage = () => {
 								<li key={member.id}>
 									{member.firstName} {member.lastName.toUpperCase()} (
 									{member.email}) {member.isStudent && `- student`}
+									<br />
+									{member.emailValidated ? (
+										'Email validated'
+									) : (
+										<>
+											<Typography>Pending email validation</Typography>
+											<Button
+												onClick={async () => handleGenerateNewToken(member.id)}
+											>
+												Generate new token
+											</Button>
+											{member.emailValidationToken && (
+												<Typography>
+													Validation link: http://{window.location.host}/token/
+													{member.emailValidationToken}
+												</Typography>
+											)}
+										</>
+									)}
 									<br />
 									{member.isStudent ? (
 										<>

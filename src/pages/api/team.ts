@@ -8,38 +8,9 @@ import schema, {
 	TeamMemberRegistration,
 	TeamRegistration,
 } from 'schemas/teamRegistration';
+import {generateEmailValidationToken} from 'utils';
 
 const prisma = new PrismaClient();
-
-/**
- * Create a new user.
- * @param values - New user data
- */
-//  async function signup(
-//   data: SignUpData,
-//   res: NextApiResponse<UserWithoutPassword | string>
-// ) {
-//   const { email, username, password: rawPassword } = data;
-
-//   try {
-//     const { password, ...user } = await prisma.user.create({
-//       data: {
-//         email,
-//         username,
-//         password: await argon2.hash(rawPassword),
-//       },
-//     });
-
-//     res.status(201).json(user);
-//   } catch (err) {
-//     if (err instanceof Prisma.PrismaClientKnownRequestError) {
-//       // TODO: Better managment of Prisma error, using yup.ValidationError for example
-//       res.status(400).end(err.message);
-//     } else {
-//       throw err;
-//     }
-//   }
-// }
 
 async function getAllTeams(response: NextApiResponse) {
 	const teams = await prisma.team
@@ -72,8 +43,8 @@ async function register(data: TeamRegistration, response: NextApiResponse) {
 
 	const password = await bcrypt.hash(data.password, 10);
 
-	// Prevent return the hashed password
 	try {
+		// Prevent returning the hashed password
 		const {password: _, ...team} = await prisma.team.create({
 			data: {
 				...data,
@@ -83,10 +54,15 @@ async function register(data: TeamRegistration, response: NextApiResponse) {
 				password,
 				members: {
 					createMany: {
-						data: data.members.map((member) => ({
-							...member,
-							isStudent: member.isStudent === 'YES',
-						})),
+						data: await Promise.all(
+							data.members.map(async (member) => ({
+								...member,
+								isStudent: member.isStudent === 'YES',
+								emailValidationToken: await generateEmailValidationToken(
+									member.email,
+								),
+							})),
+						),
 					},
 				},
 			},
