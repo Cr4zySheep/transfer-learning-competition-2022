@@ -26,10 +26,14 @@ const MyApp = ({
 				<meta name="viewport" content="initial-scale=1, width=device-width" />
 			</Head>
 			<ThemeProvider theme={theme}>
-				{/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-				<CssBaseline />
-				<Component {...pageProps} />
-				<Copyright />
+				<div
+					style={{minHeight: '100vh', position: 'relative', paddingBottom: 55}}
+				>
+					{/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+					<CssBaseline />
+					<Component {...pageProps} />
+					<Copyright />
+				</div>
 			</ThemeProvider>
 		</CacheProvider>
 	);
