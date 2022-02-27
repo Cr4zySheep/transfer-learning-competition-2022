@@ -96,7 +96,7 @@ const AdminPage: NextPage = () => {
 											<Button
 												onClick={async () => handleGenerateNewToken(member.id)}
 											>
-												Generate new token
+												Generate new token and resend an email
 											</Button>
 											{member.emailValidationToken && (
 												<Typography>

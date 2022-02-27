@@ -2,7 +2,7 @@ import {PrismaClient} from '@prisma/client';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {number, object} from 'yup';
 import validate from 'middlewares/validate';
-import {generateEmailValidationToken} from 'utils';
+import {generateEmailValidationToken, sendValidationEmail} from 'utils';
 
 const prisma = new PrismaClient();
 
@@ -13,17 +13,26 @@ async function handler(request: NextApiRequest, response: NextApiResponse) {
 		case 'POST': {
 			const id = request.body.id as number;
 			try {
-				const user = await prisma.teamMember.findUnique({
+				// Check that user exists
+				await prisma.teamMember.findUnique({
 					where: {id},
 					select: {id: true, email: true},
 					rejectOnNotFound: true,
 				});
-				const token = await generateEmailValidationToken(user.email);
+
+				// Generate a new token
+				const token = await generateEmailValidationToken();
 				const updatedUser = await prisma.teamMember.update({
 					where: {id},
 					data: {emailValidationToken: token, emailValidated: null},
 				});
 				response.status(200).json(updatedUser);
+
+				await sendValidationEmail(
+					updatedUser.firstName,
+					updatedUser.email,
+					updatedUser.emailValidationToken!, // Won't be null since it was generated above
+				);
 			} catch {
 				response.status(400).end('Unknown user');
 			}

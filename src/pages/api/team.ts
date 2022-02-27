@@ -8,7 +8,7 @@ import schema, {
 	TeamMemberRegistration,
 	TeamRegistration,
 } from 'schemas/teamRegistration';
-import {generateEmailValidationToken} from 'utils';
+import {generateEmailValidationToken, sendValidationEmail} from 'utils';
 
 const prisma = new PrismaClient();
 
@@ -58,9 +58,7 @@ async function register(data: TeamRegistration, response: NextApiResponse) {
 							data.members.map(async (member) => ({
 								...member,
 								isStudent: member.isStudent === 'YES',
-								emailValidationToken: await generateEmailValidationToken(
-									member.email,
-								),
+								emailValidationToken: await generateEmailValidationToken(),
 							})),
 						),
 					},
@@ -70,6 +68,16 @@ async function register(data: TeamRegistration, response: NextApiResponse) {
 		});
 
 		response.status(201).json(team);
+
+		await Promise.all(
+			team.members.map(async (member) =>
+				sendValidationEmail(
+					member.firstName,
+					member.email,
+					member.emailValidationToken!, // Won't be null since it was generated above
+				),
+			),
+		);
 	} catch (error: unknown) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
 			// TODO: Better managment of Prisma error, using yup.ValidationError for example

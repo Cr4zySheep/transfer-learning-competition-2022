@@ -18,6 +18,14 @@ const RegistrationSuccessDialog = ({open}: RegistrationSuccessDialogProps) => {
 		<Dialog fullWidth open={open} maxWidth="sm">
 			<DialogTitle>Registration successfull!</DialogTitle>
 			<DialogContent>
+				<DialogContentText paragraph>
+					Thank you for registering for our competition. We have sent you an
+					email with a verification link. Please click this link to verify your
+					email.
+				</DialogContentText>
+				<DialogContentText paragraph>
+					Also check your SPAM folder !
+				</DialogContentText>
 				<DialogContentText>
 					You can now read more carefully the information about the competition
 					by clicking the button below.
