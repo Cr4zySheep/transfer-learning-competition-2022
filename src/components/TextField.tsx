@@ -19,7 +19,7 @@ const TextField = ({name, ...props}: TextFieldProps) => {
 			name={name}
 			error={meta.touched && Boolean(meta.error)}
 			helperText={meta.touched && meta.error}
-			sx={{minHeight: 72}}
+			sx={{minHeight: 72, ...props.sx}}
 		/>
 	);
 };

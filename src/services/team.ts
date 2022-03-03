@@ -1,5 +1,4 @@
 import axios from 'axios';
-// Import {join} from 'node:path';
 
 import {TeamRegistration} from 'schemas/teamRegistration';
 import {TeamWithMembers} from 'types';

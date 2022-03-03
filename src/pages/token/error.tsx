@@ -18,6 +18,7 @@ const TokenError = () => {
 					display: 'flex',
 					flexDirection: 'column',
 					alignItems: 'center',
+					boxShadow: theme.shadows[5],
 				})}
 			>
 				<ErrorOutlineIcon sx={{fontSize: 72}} color="error" />

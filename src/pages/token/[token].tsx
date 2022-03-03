@@ -7,10 +7,7 @@ const VerifyToken = () => {
 
 export default VerifyToken;
 
-export const getServerSideProps: GetServerSideProps = async ({
-	res: response,
-	params,
-}) => {
+export const getServerSideProps: GetServerSideProps = async ({params}) => {
 	let redirectURL: string;
 
 	const prisma = new PrismaClient();
@@ -34,8 +31,10 @@ export const getServerSideProps: GetServerSideProps = async ({
 		redirectURL = '/token/error';
 	}
 
-	response.statusCode = 302;
-	response.setHeader('location', redirectURL);
-
-	return {props: {}};
+	return {
+		redirect: {
+			destination: redirectURL,
+			permanent: false,
+		},
+	};
 };
