@@ -19,7 +19,8 @@ model Team {
   acceptRules         Boolean  @default(false)
   acceptDataTreatment Boolean  @default(false)
 
-  members TeamMember[]
+  members     TeamMember[]
+  submissions Submission[]
 }
 
 model TeamMember {
@@ -39,6 +40,14 @@ model TeamMember {
   emailValidated       DateTime?
   emailValidationToken String?
 
+  team   Team @relation(fields: [teamId], references: [id])
+  teamId Int
+}
+
+model Submission {
+  id          Int      @id @default(autoincrement())
+  submittedAt DateTime @default(now())
+  fileName    String
 
   team   Team @relation(fields: [teamId], references: [id])
   teamId Int

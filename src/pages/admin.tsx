@@ -1,14 +1,15 @@
 import React, {useState} from 'react';
 import type {NextPage} from 'next';
 import {Button, Container, Grid, Typography} from '@mui/material';
-import {TeamWithMembers} from 'types';
+import {TeamWithMembersAndSubmissions} from 'types';
 import TextField from 'components/TextField';
 import {Form, Formik} from 'formik';
 import {getAll} from 'services/team';
 import {generateNewEmailValidationToken} from 'services/admin';
 
 const AdminPage: NextPage = () => {
-	const [teams, setTeams] = useState<TeamWithMembers[]>();
+	const [teams, setTeams] =
+		useState<Array<Omit<TeamWithMembersAndSubmissions, 'password'>>>();
 
 	if (!teams)
 		return (
@@ -70,8 +71,6 @@ const AdminPage: NextPage = () => {
 		});
 	};
 
-	// TODO: Add way to generate text to send for member to validate their email address or better, a button "Resend an email"
-
 	return (
 		<Container>
 			<Typography variant="h4">Liste des équipes</Typography>
@@ -80,6 +79,8 @@ const AdminPage: NextPage = () => {
 				{teams.map((team) => (
 					<li key={team.id}>
 						Team #{team.id} {team.firstYearOnly && ' - First year only'}
+						<br />
+						{team.submissions.length} submissions
 						<br />
 						Members:
 						<ul>

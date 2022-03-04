@@ -9,14 +9,18 @@ import schema, {
 	TeamRegistration,
 } from 'schemas/teamRegistration';
 import {generateEmailValidationToken, sendValidationEmail} from 'utils';
-import {parseTeamWithMembersToJson} from 'lib/team';
+import {parseTeamWithMembersAndSubmissionToJson} from 'lib/team';
 
 const prisma = new PrismaClient();
 
 async function getAllTeams(response: NextApiResponse) {
 	const teams = await prisma.team
-		.findMany({include: {members: true}})
-		.then((data) => data.map((team) => parseTeamWithMembersToJson(team)));
+		.findMany({
+			include: {members: true, submissions: {orderBy: {submittedAt: 'desc'}}},
+		})
+		.then((data) =>
+			data.map((team) => parseTeamWithMembersAndSubmissionToJson(team)),
+		);
 
 	response.status(200).send(teams);
 }

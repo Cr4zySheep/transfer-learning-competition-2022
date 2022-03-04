@@ -3,7 +3,6 @@
   "files.trimTrailingWhitespace": false,
   "xo.enable": true,
   "xo.format.enable": true,
-  "xo.debounce": 100,
   "[javascript]": {
     "editor.defaultFormatter": "samverschueren.linter-xo"
   },

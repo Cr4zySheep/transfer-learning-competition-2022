@@ -1,7 +1,12 @@
-import {Team, TeamMember} from '@prisma/client';
+import {Submission, Team, TeamMember} from '@prisma/client';
 
 export interface TeamWithMembers extends Team {
 	members: TeamMember[];
+}
+
+export interface TeamWithMembersAndSubmissions extends Team {
+	members: TeamMember[];
+	submissions: Submission[];
 }
 
 export interface TeamMemberJson
@@ -16,4 +21,16 @@ export interface TeamWithMembersJson
 	members: TeamMemberJson[];
 	createdAt: string;
 	updatedAt: string;
+}
+
+export interface TeamWithMembersAndSubmissionsJson
+	extends Omit<Team, 'createdAt' | 'updatedAt' | 'password'> {
+	members: TeamMemberJson[];
+	submissions: SubmissionJson[];
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface SubmissionJson extends Omit<Submission, 'submittedAt'> {
+	submittedAt: string;
 }

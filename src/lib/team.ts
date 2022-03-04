@@ -1,12 +1,15 @@
-import {TeamWithMembers, TeamWithMembersJson} from 'types';
+import {
+	TeamWithMembersAndSubmissions,
+	TeamWithMembersAndSubmissionsJson,
+} from 'types';
 
 /**
  * Remove the password, and transform dates to string.
  */
-export function parseTeamWithMembersToJson({
+export function parseTeamWithMembersAndSubmissionToJson({
 	password,
 	...team
-}: TeamWithMembers): TeamWithMembersJson {
+}: TeamWithMembersAndSubmissions): TeamWithMembersAndSubmissionsJson {
 	return {
 		...team,
 		createdAt: team.createdAt.toISOString(),
@@ -17,12 +20,16 @@ export function parseTeamWithMembersToJson({
 			updatedAt: member.updatedAt.toISOString(),
 			emailValidated: member.emailValidated?.toISOString() ?? null,
 		})),
+		submissions: team.submissions.map((submission) => ({
+			...submission,
+			submittedAt: submission.submittedAt.toISOString(),
+		})),
 	};
 }
 
-export function transformJsonToTeamWithMembers(
-	team: TeamWithMembersJson,
-): Omit<TeamWithMembers, 'password'> {
+export function transformJsonToTeamWithMembersAndSubmissions(
+	team: TeamWithMembersAndSubmissionsJson,
+): Omit<TeamWithMembersAndSubmissions, 'password'> {
 	return {
 		...team,
 		createdAt: new Date(team.createdAt),
@@ -34,6 +41,10 @@ export function transformJsonToTeamWithMembers(
 			emailValidated: member.emailValidated
 				? new Date(member.emailValidated)
 				: null,
+		})),
+		submissions: team.submissions.map((submission) => ({
+			...submission,
+			submittedAt: new Date(submission.submittedAt),
 		})),
 	};
 }

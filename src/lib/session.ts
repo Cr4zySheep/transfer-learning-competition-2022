@@ -2,6 +2,8 @@
 import process from 'node:process';
 import type {IronSessionOptions} from 'iron-session';
 
+// TODO: Use env var for password
+// TODO: Rename cookie
 export const sessionOptions: IronSessionOptions = {
 	password:
 		'random_passwordrandom_passwordrandom_passwordrandom_passwordrandom_password', // TODO: Use process.env.SECRET_COOKIE_PASSWORD!,
