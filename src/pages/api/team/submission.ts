@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {Buffer} from 'node:buffer';
 import process from 'node:process';
+import {NB_MAX_SUBMISSIONS} from 'consts';
 import busboy from 'busboy';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {sessionOptions} from 'lib/session';
@@ -38,43 +39,78 @@ async function postSubmission(
 	);
 	const filename = path.join(teamFolder, `${now.toISOString()}_${id}`);
 
-	try {
-		fs.mkdirSync(teamFolder);
-	} catch {}
+	console.log(timestamp(), '- Creating team folder:', teamFolder);
+	await fs.promises.mkdir(teamFolder, {recursive: true});
 
-	const bb = busboy({headers: request.headers});
-	bb.on('file', (name, file, info) => {
-		console.log(
-			timestamp(),
-			filename,
-			'Encoding:',
-			info.encoding,
-			'Filename:',
-			info.filename,
-			'Mime type:',
-			info.mimeType,
-		);
-		console.log(timestamp(), filename, '- Start saving');
-		const fstream = fs.createWriteStream(filename);
-		file.pipe(fstream);
+	let hasFile = false;
 
-		fstream.on('close', async () => {
-			console.log(timestamp(), filename, '- Saved successfully!');
-			const prisma = new PrismaClient();
-			const submission = await prisma.submission.create({
-				data: {
-					submittedAt: now,
-					fileName: filename,
-					teamId,
-				},
-			});
-			response.json(submission);
+	return new Promise<void>((resolve) => {
+		const bb = busboy({
+			headers: request.headers,
+			highWaterMark: 2 * 1024 * 1024, // Set 2MiB buffer
 		});
+
+		console.log(timestamp(), filename, '- Start saving');
+		bb.on('file', async (name, file, info) => {
+			hasFile = true;
+			console.log(
+				timestamp(),
+				filename,
+				'Encoding:',
+				info.encoding,
+				'Filename:',
+				info.filename,
+				'Mime type:',
+				info.mimeType,
+			);
+
+			const fstream = fs.createWriteStream(filename);
+			file.pipe(fstream);
+
+			fstream.on('close', async () => {
+				console.log(timestamp(), filename, '- Saved successfully!');
+				const prisma = new PrismaClient();
+				const submission = await prisma.submission.create({
+					data: {
+						submittedAt: now,
+						fileName: filename,
+						teamId,
+					},
+				});
+				response.json(submission);
+
+				// Limit the number of submissions
+				const submissionsToDelete = await prisma.submission.findMany({
+					where: {teamId},
+					orderBy: {submittedAt: 'desc'},
+					skip: NB_MAX_SUBMISSIONS,
+				});
+
+				await Promise.allSettled(
+					submissionsToDelete.map(async (sub) => {
+						await fs.promises.unlink(sub.fileName);
+						console.log(timestamp(), 'Removed file', sub.fileName);
+					}),
+				);
+
+				const ids = submissionsToDelete.map((sub) => sub.id);
+				await prisma.submission.deleteMany({
+					where: {id: {in: ids}},
+				});
+				console.log(timestamp(), 'Deleted the following submissions', ids);
+				resolve();
+			});
+		});
+
+		bb.on('close', () => {
+			if (!hasFile) {
+				response.status(400).send('');
+				resolve();
+			}
+		});
+
+		request.pipe(bb);
 	});
-
-	// Bb.on('close', () => {});
-
-	request.pipe(bb);
 }
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {

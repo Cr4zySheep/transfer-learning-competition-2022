@@ -89,7 +89,9 @@
     "ignores": [
       "next-env.d.ts",
       "next.config.js",
-      "lint-staged.config.js"
+      "lint-staged.config.js",
+      ".next/",
+      "node_modules/"
     ]
   }
 }

@@ -37,7 +37,9 @@ const Login = () => {
 		return login(values)
 			.then(async () => router.push('/my-team'))
 			.catch(() => {
-				setStatus('Invalid email address and password combination.');
+				setStatus(
+					"Either invalid email address and password combination, or you haven't validated your email address.",
+				);
 			});
 	};
 
@@ -108,12 +110,12 @@ const Login = () => {
 							Not registered yet?
 						</Link>
 					</NextLink>
-					<br />
+					{/* <br />
 					<NextLink passHref href="/forgotten-password">
 						<Link underline="hover" variant="body2">
 							Reset your password?
 						</Link>
-					</NextLink>
+					</NextLink> */}
 				</Box>
 			</Wrapper>
 		</Container>
@@ -123,8 +125,6 @@ const Login = () => {
 export default Login;
 
 // TODO: Reset your password
-
-// TODO: Redirect if already logged in
 
 export const getServerSideProps = withIronSessionSsr(async ({req}) => {
 	const team = req.session.team;

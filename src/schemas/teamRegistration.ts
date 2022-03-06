@@ -39,9 +39,7 @@ const teamMemberRegistration = object({
 const teamRegistration = object({
 	members: array(teamMemberRegistration).min(1).max(4),
 	password: string().required(MANDATORY_FIELD).min(8),
-	acceptRules: bool()
-		.required()
-		.oneOf([true], 'You have to accept the rules in order to register.'),
+	acceptRules: bool().required().oneOf([true], 'Read the text please.'),
 	acceptDataTreatment: bool().oneOf(
 		[true],
 		"You need to accept, otherwise you can't take part in the competition.",
