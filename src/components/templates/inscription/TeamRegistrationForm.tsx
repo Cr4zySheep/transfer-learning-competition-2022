@@ -202,16 +202,8 @@ const TeamRegistrationForm = () => {
 							name="acceptRules"
 							label={
 								<>
-									The whole team is aware that the opening ceremony where all
-									useful information will be revealed is on March 8th, 20:30
-									(Paris time) and can be joined using the link{' '}
-									<Link
-										href="https://webconf.centrale-marseille.fr/transferlearning"
-										target="__blank"
-									>
-										https://webconf.centrale-marseille.fr/transferlearning
-									</Link>
-									.
+									The team is aware that the final submission deadline for the
+									competition is April 5th 23:59 (Paris time).
 								</>
 							}
 						/>

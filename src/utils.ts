@@ -25,6 +25,7 @@ export async function sendValidationEmail(
 	const transporter = getMailTransport();
 
 	const text = `Dear ${firstName},
+
 Thank you for registering as a member of a team in Transfer Learning's Ceteris Paribus Face Challenge.
 
 A few IMPORTANT THINGS for you to know :
@@ -33,8 +34,9 @@ A few IMPORTANT THINGS for you to know :
 		process.env.HOSTNAME ?? ''
 	}/token/${token}
 
-	- Don't forget to tune in on Tuesday, March 8th at 20:30 (Paris time) for the opening ceremony !
-Link to join : https://webconf.centrale-marseille.fr/transferlearning
+	- You can log in to your team account from this page using your email and your team password : https://competition.transfer-learning.org/login
+
+Good luck competing ! You have until April 5th to send us your submissions !
 
 Best regards,
 The organizing team`;
@@ -50,7 +52,6 @@ The organizing team`;
 }
 
 export async function generateEmailValidationToken(): Promise<string> {
-	// TODO: Send an email
 	let token: string;
 	let isTaken: boolean;
 	do {

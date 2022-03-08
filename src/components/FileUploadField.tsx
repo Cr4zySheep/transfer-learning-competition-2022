@@ -44,7 +44,7 @@ const FileUploadField: React.FC<FileUploadFieldProps> = ({name, disabled}) => {
 					? `${field.value.name} (${(field.value.size / 1_000_000).toFixed(
 							0,
 					  )} MB)`
-					: 'Upload your results (Max 5 GB)'}
+					: 'Upload your results (Max 1 GB)'}
 			</Button>
 
 			{meta.error && (
