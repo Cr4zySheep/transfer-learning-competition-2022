@@ -1,7 +1,7 @@
 import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
-import loginSchema, {LoginData} from 'schemas/auth';
+import {loginSchema, LoginData} from 'schemas/auth';
 import validate from 'middlewares/validate';
 import {NextApiRequest, NextApiResponse} from 'next';
 import bcrypt from 'bcrypt';
@@ -38,7 +38,7 @@ const loginRoute = async (
 				id: team.id,
 			};
 			await request.session.save();
-			response.send(undefined);
+			response.send('');
 			break;
 		}
 

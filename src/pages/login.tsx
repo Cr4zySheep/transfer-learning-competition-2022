@@ -13,7 +13,7 @@ import {
 import {Formik, Form, FormikHelpers} from 'formik';
 import TextField from 'components/TextField';
 import NextLink from 'next/link';
-import loginSchema, {LoginData} from 'schemas/auth';
+import {loginSchema, LoginData} from 'schemas/auth';
 import {login} from 'services/auth';
 import {useRouter} from 'next/router';
 import {sessionOptions} from 'lib/session';
@@ -110,12 +110,12 @@ const Login = () => {
 							Not registered yet?
 						</Link>
 					</NextLink>
-					{/* <br />
+					<br />
 					<NextLink passHref href="/forgotten-password">
 						<Link underline="hover" variant="body2">
 							Reset your password?
 						</Link>
-					</NextLink> */}
+					</NextLink>
 				</Box>
 			</Wrapper>
 		</Container>
@@ -123,8 +123,6 @@ const Login = () => {
 };
 
 export default Login;
-
-// TODO: Reset your password
 
 export const getServerSideProps = withIronSessionSsr(async ({req}) => {
 	const team = req.session.team;

@@ -21,6 +21,10 @@ model Team {
 
   members     TeamMember[]
   submissions Submission[]
+
+  // Fields use for resetting password
+  resetPasswordToken        String?
+  resetPasswordConsentToken String?
 }
 
 model TeamMember {
@@ -39,6 +43,9 @@ model TeamMember {
   // Fields used for email validation
   emailValidated       DateTime?
   emailValidationToken String?
+
+  // Field use for resetting password
+  isResetPasswordAuthor Boolean @default(false)
 
   team   Team @relation(fields: [teamId], references: [id])
   teamId Int
