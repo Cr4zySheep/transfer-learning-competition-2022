@@ -23,14 +23,13 @@ import WorkerForm from './WorkerForm';
  */
 
 interface TeamMemberFormProps {
+	prefix: string;
 	index: number;
 	remove?: () => void;
 }
 
-const TeamMemberForm = ({index, remove}: TeamMemberFormProps) => {
-	const prefix = `members[${index}]`;
-
-	const [field, meta] = useField(prefix + '.isStudent');
+const TeamMemberForm = ({prefix, index, remove}: TeamMemberFormProps) => {
+	const [field, meta] = useField(prefix + 'isStudent');
 
 	return (
 		<Grid item xs={12} md={6}>
@@ -42,7 +41,7 @@ const TeamMemberForm = ({index, remove}: TeamMemberFormProps) => {
 					<Grid item xs={12} md={6}>
 						<TextField
 							fullWidth
-							name={prefix + '.firstName'}
+							name={prefix + 'firstName'}
 							label="First name *"
 							variant="standard"
 						/>
@@ -50,7 +49,7 @@ const TeamMemberForm = ({index, remove}: TeamMemberFormProps) => {
 					<Grid item xs={12} md={6}>
 						<TextField
 							fullWidth
-							name={prefix + '.lastName'}
+							name={prefix + 'lastName'}
 							label="Last name *"
 							variant="standard"
 						/>
@@ -59,7 +58,7 @@ const TeamMemberForm = ({index, remove}: TeamMemberFormProps) => {
 
 				<TextField
 					fullWidth
-					name={prefix + '.email'}
+					name={prefix + 'email'}
 					label="Email address *"
 					variant="standard"
 				/>

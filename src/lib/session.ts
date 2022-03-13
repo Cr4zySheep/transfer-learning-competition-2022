@@ -19,5 +19,6 @@ declare module 'iron-session' {
 		team?: {
 			id: number;
 		};
+		admin: boolean;
 	}
 }

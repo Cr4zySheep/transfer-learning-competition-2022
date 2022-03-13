@@ -1,4 +1,3 @@
-import process from 'node:process';
 import {Prisma, PrismaClient} from '@prisma/client';
 import {NextApiRequest, NextApiResponse} from 'next';
 import bcrypt from 'bcrypt';
@@ -9,21 +8,8 @@ import schema, {
 	TeamRegistration,
 } from 'schemas/teamRegistration';
 import {generateEmailValidationToken, sendValidationEmail} from 'utils';
-import {parseTeamWithMembersAndSubmissionToJson} from 'lib/team';
 
 const prisma = new PrismaClient();
-
-async function getAllTeams(response: NextApiResponse) {
-	const teams = await prisma.team
-		.findMany({
-			include: {members: true, submissions: {orderBy: {submittedAt: 'desc'}}},
-		})
-		.then((data) =>
-			data.map((team) => parseTeamWithMembersAndSubmissionToJson(team)),
-		);
-
-	response.status(200).send(teams);
-}
 
 function isFirstYearStudent(member: TeamMemberRegistration) {
 	return member.isStudent === 'YES' && member.yearOfStudy === '1A';
@@ -84,21 +70,12 @@ async function register(data: TeamRegistration, response: NextApiResponse) {
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {
 	switch (request.method) {
-		case 'GET':
-			if (request.query.password === process.env.ADMIN_PASSWORD) {
-				await getAllTeams(response);
-			} else {
-				response.status(403).send(undefined);
-			}
-
-			break;
-
 		case 'POST':
 			await register(request.body, response);
 			break;
 
 		default:
-			response.setHeader('Allow', ['GET', 'POST']);
+			response.setHeader('Allow', ['POST']);
 			response.status(405).end(`Method ${request.method ?? ''} Not Allowed`);
 	}
 }

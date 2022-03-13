@@ -11,13 +11,13 @@ const WorkerForm = ({prefix}: WorkerFormProps) => {
 		<>
 			<TextField
 				fullWidth
-				name={prefix + '.companyName'}
+				name={prefix + 'companyName'}
 				label="Company name"
 				variant="standard"
 			/>
 			<TextField
 				fullWidth
-				name={prefix + '.companyRole'}
+				name={prefix + 'companyRole'}
 				label="Your role inside the company"
 				variant="standard"
 			/>

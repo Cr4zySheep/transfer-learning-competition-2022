@@ -139,6 +139,7 @@ const TeamRegistrationForm = () => {
 											<TeamMemberForm
 												key={index} // eslint-disable-line react/no-array-index-key
 												index={index}
+												prefix={`members[${index}].`}
 												remove={
 													values.members.length > 1
 														? () => remove(index)

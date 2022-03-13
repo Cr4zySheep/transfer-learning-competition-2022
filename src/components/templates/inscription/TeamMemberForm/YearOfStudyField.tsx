@@ -9,7 +9,7 @@ import {
 import {useField} from 'formik';
 
 const YearOfStudyField = ({prefix}: {prefix: string}) => {
-	const [field, meta] = useField(prefix + '.yearOfStudy');
+	const [field, meta] = useField(prefix + 'yearOfStudy');
 
 	return (
 		<FormControl fullWidth variant="standard" sx={{minHeight: 72}}>

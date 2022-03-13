@@ -20,8 +20,8 @@ interface UniversityFormProps {
 const UniversityForm = ({prefix}: UniversityFormProps) => {
 	const [state, setState] = useState('');
 
-	const meta = useField(prefix + '.university')[1];
-	const helpers = useField(prefix + '.university')[2];
+	const meta = useField(prefix + 'university')[1];
+	const helpers = useField(prefix + 'university')[2];
 
 	return (
 		<>
@@ -56,7 +56,7 @@ const UniversityForm = ({prefix}: UniversityFormProps) => {
 					<Grid item xs={6}>
 						<TextField
 							fullWidth
-							name={prefix + '.university'}
+							name={prefix + 'university'}
 							variant="standard"
 							label="Which one? *"
 						/>

@@ -425,8 +425,8 @@ const MyTeamPage: NextPage<MyTeamPageProps> = (props) => {
 };
 
 export const getServerSideProps = withIronSessionSsr(
-	async ({req, res: response}) => {
-		const team = req.session.team;
+	async ({req: request, res: response}) => {
+		const team = request.session.team;
 
 		if (!team) {
 			response.statusCode = 302;
@@ -449,6 +449,7 @@ export const getServerSideProps = withIronSessionSsr(
 				},
 			};
 		} catch {
+			request.session.destroy();
 			response.statusCode = 302;
 			response.setHeader('location', '/login');
 			response.end();

@@ -8,7 +8,7 @@ export const universities = new Set([
 
 const MANDATORY_FIELD = 'This field is necessary.';
 
-const teamMemberRegistration = object({
+export const teamMemberRegistration = object({
 	firstName: string().required(MANDATORY_FIELD).trim(),
 	lastName: string().required(MANDATORY_FIELD).trim(),
 	email: string()
@@ -35,6 +35,8 @@ const teamMemberRegistration = object({
 	companyName: string().optional().trim(),
 	companyRole: string().optional().trim(),
 });
+export interface TeamMemberRegistrationData
+	extends InferType<typeof teamMemberRegistration> {}
 
 const teamRegistration = object({
 	members: array(teamMemberRegistration).min(1).max(4),
