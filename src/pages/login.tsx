@@ -105,12 +105,12 @@ const Login = () => {
 				</Formik>
 
 				<Box sx={{marginTop: 1}}>
-					<NextLink passHref href="/register">
+					{/* <NextLink passHref href="/register">
 						<Link underline="hover" variant="body2">
 							Not registered yet?
 						</Link>
 					</NextLink>
-					<br />
+					<br /> */}
 					<NextLink passHref href="/forgotten-password">
 						<Link underline="hover" variant="body2">
 							Reset your password?

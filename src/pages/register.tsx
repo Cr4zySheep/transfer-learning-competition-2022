@@ -2,7 +2,7 @@ import React from 'react';
 import type {NextPage} from 'next';
 import {Box, Container, Divider, Typography} from '@mui/material';
 
-import TeamRegistrationForm from 'components/templates/inscription/TeamRegistrationForm';
+// Import TeamRegistrationForm from 'components/templates/inscription/TeamRegistrationForm';
 import Image from 'next/image';
 
 import competitionBanner from 'assets/competition_banner.png';
@@ -19,9 +19,9 @@ const TeamRegistrationPage: NextPage = () => {
 				sx={(theme) => ({marginBottom: theme.spacing(5)})}
 			/>
 
-			<Typography variant="h1">Registration</Typography>
+			<Typography variant="h3">Registration is closed.</Typography>
 
-			<TeamRegistrationForm />
+			{/* <TeamRegistrationForm /> */}
 		</Container>
 	);
 };
