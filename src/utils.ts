@@ -209,3 +209,22 @@ export async function generateResetPasswordConsentToken(): Promise<string> {
 
 	return token;
 }
+
+export async function generateResetPasswordTokenJury(): Promise<string> {
+	let token: string;
+	let isTaken: boolean;
+	do {
+		token = crypto.randomBytes(32).toString('hex');
+		/* eslint-disable no-await-in-loop */
+		isTaken = await prisma.jury
+			.findMany({
+				where: {resetPasswordToken: token},
+				select: {id: true},
+				take: 1,
+			})
+			.then((data) => data.length > 0);
+		/* eslint-enable no-await-in-loop */
+	} while (isTaken);
+
+	return token;
+}

@@ -23,7 +23,7 @@ import {
 } from 'services/admin';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
-import {PrismaClient, TeamMember} from '@prisma/client';
+import {Jury, PrismaClient, TeamMember} from '@prisma/client';
 import {
 	parseTeamWithMembersAndSubmissionToJson,
 	transformJsonToTeamWithMembersAndSubmissions,
@@ -46,6 +46,7 @@ const emptyMember = {
 
 interface AdminPageProps {
 	teams: TeamWithMembersAndSubmissionsJson[];
+	jurys: Jury[];
 }
 
 interface ButtonWithConfirmationProps extends ButtonProps {
@@ -97,7 +98,7 @@ const ButtonWithConfirmation: React.FunctionComponent<
 	);
 };
 
-const AdminPage: NextPage<AdminPageProps> = (props) => {
+const AdminPage: NextPage<AdminPageProps> = ({jurys, ...props}) => {
 	const [teams, setTeams] = useState<
 		Array<Omit<TeamWithMembersAndSubmissions, 'password'>>
 	>(
@@ -124,6 +125,22 @@ const AdminPage: NextPage<AdminPageProps> = (props) => {
 
 	return (
 		<Container>
+			<Typography variant="h4">Liste des jurys</Typography>
+			<ul>
+				{jurys.map((jury) => (
+					<li key={jury.id}>
+						{jury.firstName} {jury.lastName} ({jury.email})
+						{jury.resetPasswordToken && (
+							<>
+								<br />
+								https://transfer-learning/jury/reset-password/
+								{jury.resetPasswordToken}
+							</>
+						)}
+					</li>
+				))}
+			</ul>
+
 			<Typography variant="h4">Liste des équipes</Typography>
 
 			<Dialog
@@ -375,5 +392,7 @@ export const getServerSideProps = withIronSessionSsr(async ({req}) => {
 			data.map((team) => parseTeamWithMembersAndSubmissionToJson(team)),
 		);
 
-	return {props: {teams}};
+	const jurys = await prisma.jury.findMany();
+
+	return {props: {teams, jurys}};
 }, sessionOptions);

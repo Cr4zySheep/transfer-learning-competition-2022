@@ -18,7 +18,9 @@ declare module 'iron-session' {
 	interface IronSessionData {
 		team?: {
 			id: number;
+			// TODO: Ajouter teamMemberId
 		};
-		admin: boolean;
+		admin?: boolean;
+		jury?: {id: number};
 	}
 }

@@ -59,3 +59,13 @@ model Submission {
   team   Team @relation(fields: [teamId], references: [id])
   teamId Int
 }
+
+model Jury {
+  id        Int    @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String @unique
+  password  String @default("")
+
+  resetPasswordToken String?
+}
