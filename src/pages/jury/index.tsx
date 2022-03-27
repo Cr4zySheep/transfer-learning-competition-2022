@@ -1,19 +1,21 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {Button, Container, Grid, Typography} from '@mui/material';
 import {JURY_END_DATETIME, JURY_START_DATETIME} from 'consts';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {NextPage} from 'next';
 import Link from 'next/link';
+import {getNbEvaluationsDone} from 'lib/jury';
 
 interface JuryHomePageProps {
 	active: boolean;
+	initialNbEvaluationsDone: number;
 }
 
-const JuryHomePage: NextPage<JuryHomePageProps> = ({active}) => {
-	const [counter] = useState(0);
-	console.log('');
-
+const JuryHomePage: NextPage<JuryHomePageProps> = ({
+	active,
+	initialNbEvaluationsDone,
+}) => {
 	return (
 		<Container>
 			<Grid container justifyContent="space-between" alignItems="baseline">
@@ -33,23 +35,24 @@ const JuryHomePage: NextPage<JuryHomePageProps> = ({active}) => {
 			<Typography paragraph>
 				Dear committee member,
 				<br />
-				<br />
 				Thank you for helping us review the top 3 of this competition&apos;s two
 				leaderboards.
-				<br />
 				<br />
 				First of all, please watch the following explanatory video :{' '}
 				<strong>LINK</strong>
 				<br />
-				<br />
 				Then, click the button below to start evaluating !
 			</Typography>
 
-			<Typography paragraph>Number of evaluations done: {counter}</Typography>
+			<Typography paragraph>
+				Number of evaluations done: {initialNbEvaluationsDone}
+			</Typography>
 
-			<Button variant="contained" disabled={!active}>
-				Start evaluating
-			</Button>
+			<Link passHref href="/jury/evaluation">
+				<Button variant="contained" disabled={!active}>
+					Start evaluating
+				</Button>
+			</Link>
 		</Container>
 	);
 };
@@ -73,31 +76,9 @@ export const getServerSideProps = withIronSessionSsr<JuryHomePageProps>(
 		return {
 			props: {
 				active: JURY_START_DATETIME <= today && today <= JURY_END_DATETIME,
+				initialNbEvaluationsDone: await getNbEvaluationsDone(jury.id),
 			},
 		};
-
-		// Const prisma = new PrismaClient();
-		// try {
-		// 	const teamWithMembers = await prisma.team.findUnique({
-		// 		where: {id: team.id},
-		// 		include: {members: true, submissions: {orderBy: {submittedAt: 'desc'}}},
-		// 		rejectOnNotFound: true,
-		// 	});
-
-		// 	return {
-		// 		props: {
-		// 			team: parseTeamWithMembersAndSubmissionToJson(teamWithMembers),
-		// 			canSubmit: new Date() < PARTICIPANT_SUBMISSION_DEADLINE,
-		// 		},
-		// 	};
-		// } catch {
-		// 	return {
-		// 		redirect: {
-		// 			destination: '/login',
-		// 			permanent: false,
-		// 		},
-		// 	};
-		// }
 	},
 	sessionOptions,
 );

@@ -23,10 +23,9 @@ import {
 } from 'services/evaluations';
 import {Evaluation, EvaluationCriteria} from '@prisma/client';
 import Image from 'next/image';
-import {getNbRemainingEvaluations} from 'lib/team';
-import {PARTICIPANT_EVALUATION_END, VARIATION_TEXTS} from 'consts';
+import {JURY_END_DATETIME, JURY_START_DATETIME, VARIATION_TEXTS} from 'consts';
 import Head from 'next/head';
-import {useRouter} from 'next/router';
+import {getNbEvaluationsDone} from 'lib/jury';
 
 interface VariationDescProps {
 	variation: string;
@@ -77,9 +76,11 @@ const InstructionsDialog = (props: DialogProps) => {
 	return (
 		<Dialog {...props} fullWidth maxWidth="sm">
 			<DialogTitle>How to evaluate a sample?</DialogTitle>
+
 			<DialogContent>
 				<DialogContentText>TEXT TEXT</DialogContentText>
 			</DialogContent>
+
 			<DialogActions>
 				<Button
 					variant="contained"
@@ -94,45 +95,17 @@ const InstructionsDialog = (props: DialogProps) => {
 	);
 };
 
-const TaskFinishedDialog = (props: DialogProps) => {
-	const router = useRouter();
-
-	return (
-		<Dialog
-			{...props}
-			fullWidth
-			maxWidth="sm"
-			onClose={async () => {
-				await router.push('/my-team');
-			}}
-		>
-			<DialogTitle>Evaluation finished!</DialogTitle>
-			<DialogContent>
-				<DialogContentText>
-					Your team has evaluated enough samples in order to qualify.
-				</DialogContentText>
-			</DialogContent>
-			<DialogActions>
-				<Link passHref href="/my-team">
-					<Button variant="contained">Continue</Button>
-				</Link>
-			</DialogActions>
-		</Dialog>
-	);
-};
-
 interface EvaluationPageProps {
-	initialNbRemainingEvaluations: number;
+	initialNbEvaluationsDone: number;
 }
 
 const EvaluationPage: NextPage<EvaluationPageProps> = ({
-	initialNbRemainingEvaluations,
+	initialNbEvaluationsDone,
 }) => {
-	const [nbRemainingEvaluations, setRemainingEvaluations] = useState(
-		initialNbRemainingEvaluations,
+	const [nbEvaluationsDone, setNbEvaluationsDone] = useState(
+		initialNbEvaluationsDone,
 	);
 	const [showInstructions, setShowInstructions] = useState(true);
-	const [showTaskFinishedDialog, setShowTaskFinishedDialog] = useState(false);
 	const [showCriteriaDialog, setShowCriteriaDialog] = useState(true);
 
 	const [fetchedEvaluations, setFetchedEvaluations] = useState<Evaluation[]>(
@@ -140,7 +113,7 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 	);
 
 	useEffect(() => {
-		if (fetchedEvaluations.length < 2 && nbRemainingEvaluations > 0) {
+		if (fetchedEvaluations.length < 2) {
 			fetchNextAssignedEvaluations(fetchedEvaluations[0]?.id)
 				.then((data) => {
 					setFetchedEvaluations([...fetchedEvaluations, data]);
@@ -149,7 +122,7 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 					console.error(error);
 				});
 		}
-	}, [fetchedEvaluations, nbRemainingEvaluations]);
+	}, [fetchedEvaluations]);
 
 	const currentEvaluation = fetchedEvaluations[0];
 	const nextEvaluation = fetchedEvaluations[1];
@@ -167,37 +140,29 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 	const selectImage = async (choice: boolean): Promise<void> => {
 		if (!currentEvaluation) return;
 
-		setDisabled(true);
 		chooseEvaluation(currentEvaluation.id, choice)
 			.then((x) => {
-				setRemainingEvaluations(x);
-				if (x <= 0) {
-					setShowTaskFinishedDialog(true);
-				}
+				setNbEvaluationsDone(x);
 			})
 			.catch((error) => {
-				console.log(error);
+				console.error(error);
 			});
 
-		// This isn't the last evaluations. This assumption can be false when another team member already finished everything.
-		if (nbRemainingEvaluations > 1) {
-			if (
-				currentEvaluation.evaluationCriteria !==
-				nextEvaluation?.evaluationCriteria
-			) {
-				setShowCriteriaDialog(true);
-			}
-
-			setFetchedEvaluations((previousFetchedEvaluations) =>
-				previousFetchedEvaluations.slice(1),
-			);
-
-			timeoutRef.current = setTimeout(() => {
-				setDisabled(false);
-			}, 1000);
-		} else {
-			setShowTaskFinishedDialog(true);
+		if (
+			currentEvaluation.evaluationCriteria !==
+			nextEvaluation?.evaluationCriteria
+		) {
+			setShowCriteriaDialog(true);
 		}
+
+		setFetchedEvaluations((previousFetchedEvaluations) =>
+			previousFetchedEvaluations.slice(1),
+		);
+
+		setDisabled(true);
+		timeoutRef.current = setTimeout(() => {
+			setDisabled(false);
+		}, 1000);
 	};
 
 	return (
@@ -212,8 +177,6 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 					setShowInstructions(false);
 				}}
 			/>
-
-			<TaskFinishedDialog open={showTaskFinishedDialog} />
 
 			{currentEvaluation && (
 				<CriteriaInformationDialog
@@ -238,11 +201,11 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 						sx={{paddingTop: 2, marginBottom: 2}}
 					>
 						<Typography variant="h4">
-							Remaining evaluations: {Math.max(nbRemainingEvaluations, 0)}
+							Number of evaluations done: {nbEvaluationsDone}
 						</Typography>
 
 						<Grid item>
-							<Link passHref href="/my-team">
+							<Link passHref href="/jury">
 								<Button variant="outlined">Stop evaluating</Button>
 							</Link>
 						</Grid>
@@ -300,12 +263,6 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 										if (!disabled) await selectImage(true);
 									}}
 								/>
-								{/* <Image
-							unoptimized
-							loader={({src}) => src}
-							layout="fill"
-							objectFit="contain"
-						/> */}
 							</Grid>
 						</Grid>
 					)}
@@ -347,43 +304,35 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 };
 
 export const getServerSideProps = withIronSessionSsr(async ({req: request}) => {
-	if (!request.session.team) {
+	if (!request.session.jury) {
 		return {
 			redirect: {
-				destination: '/login',
+				destination: '/jury/login',
 				permanent: false,
 			},
 		};
 	}
 
 	const now = new Date();
-	if (now > PARTICIPANT_EVALUATION_END) {
+	if (now < JURY_START_DATETIME || now > JURY_END_DATETIME) {
 		return {
 			redirect: {
-				destination: '/my-team',
+				destination: '/jury',
 				permanent: false,
 			},
 		};
 	}
 
 	try {
-		const nbRemainingEvaluations = await getNbRemainingEvaluations(
-			request.session.team.id,
+		const nbEvaluationsDone = await getNbEvaluationsDone(
+			request.session.jury.id,
 		);
 
-		if (nbRemainingEvaluations <= 0)
-			return {
-				redirect: {
-					destination: '/my-team',
-					permanent: false,
-				},
-			};
-
-		return {props: {initialNbRemainingEvaluations: nbRemainingEvaluations}};
+		return {props: {initialNbEvaluationsDone: nbEvaluationsDone}};
 	} catch {
 		return {
 			redirect: {
-				destination: '/login',
+				destination: '/jury/login',
 				permanent: false,
 			},
 		};

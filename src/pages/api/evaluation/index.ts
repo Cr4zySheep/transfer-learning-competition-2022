@@ -1,8 +1,10 @@
+import process from 'node:process';
 import {
 	EvaluationStatus,
 	Evaluation,
 	EvaluationCriteria,
 	PrismaClient,
+	Prisma,
 } from '@prisma/client';
 import axios from 'axios';
 import {withIronSessionApiRoute} from 'iron-session/next';
@@ -10,8 +12,6 @@ import {sessionOptions} from 'lib/session';
 import {NextApiRequest, NextApiResponse} from 'next';
 
 const prisma = new PrismaClient();
-
-const PYTHON_SERVER = 'http://127.0.0.1:5000';
 
 interface EvaluationData {
 	name: string;
@@ -31,7 +31,7 @@ const evaluationMapping = [
 
 const isScriptRunning: Record<number, boolean> = {};
 
-async function getNextEvaluation(
+async function getNextEvaluationForTeam(
 	request: NextApiRequest,
 	response: NextApiResponse,
 ) {
@@ -91,10 +91,13 @@ async function getNextEvaluation(
 		} else {
 			isScriptRunning[team.id] = true;
 			const evaluationsData = await axios
-				.post<{evaluations: EvaluationData[]}>(`${PYTHON_SERVER}/evaluations`, {
-					teamId: team.id,
-					teamMemberId: team.memberId,
-				})
+				.post<{evaluations: EvaluationData[]}>(
+					`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
+					{
+						teamId: team.id,
+						teamMemberId: team.memberId,
+					},
+				)
 				.then((response) => response.data.evaluations);
 
 			const data = {
@@ -119,24 +122,87 @@ async function getNextEvaluation(
 	response.send(evaluation);
 }
 
-async function handler(request: NextApiRequest, response: NextApiResponse) {
-	const team = request.session.team;
+async function getNextEvaluationForJury(
+	request: NextApiRequest,
+	response: NextApiResponse,
+) {
+	const jury = request.session.jury!;
+	const {ignoreId} = request.query;
 
-	if (
-		!team ||
-		!(await prisma.team.findFirst({where: {id: team.id}, select: {id: true}}))
-	) {
-		response.status(401).send('You should be logged in.');
-		return;
-	}
+	let evaluation: Evaluation | null;
+	do {
+		/* eslint-disable no-await-in-loop */
+
+		evaluation = await prisma.evaluation.findFirst({
+			where: {
+				assignedJuryId: jury.id,
+				status: EvaluationStatus.PENDING,
+				NOT: {
+					id: ignoreId ? Number(ignoreId) : undefined,
+				},
+			},
+		});
+
+		if (evaluation) continue;
+
+		const evaluationsData = await axios
+			.post<{evaluations: EvaluationData[]}>(
+				`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
+				{
+					juryId: jury.id,
+				},
+			)
+			.then((response) => response.data.evaluations);
+
+		const data: Prisma.EvaluationCreateManyInput[] = evaluationsData.map(
+			(evaluationData) => ({
+				name: evaluationData.name,
+				idTeamA: evaluationData.idTeamA,
+				idTeamB: evaluationData.idTeamB,
+				assignedJuryId: jury.id,
+				evaluationCriteria:
+					evaluationMapping[evaluationData.evaluationCriteria],
+				version: 0,
+			}),
+		);
+		await prisma.evaluation.createMany({data});
+		/* eslint-enable no-await-in-loop */
+	} while (!evaluation);
+
+	response.send(evaluation);
+}
+
+async function handler(request: NextApiRequest, response: NextApiResponse) {
+	const {team, jury} = request.session;
 
 	switch (request.method) {
 		case 'GET':
-			await getNextEvaluation(request, response);
+			if (
+				// Team
+				team &&
+				(await prisma.team.findFirst({
+					where: {id: team.id},
+					select: {id: true},
+				}))
+			) {
+				await getNextEvaluationForTeam(request, response);
+			} else if (
+				// Jury
+				jury &&
+				(await prisma.jury.findUnique({
+					where: {id: jury.id},
+					select: {id: true},
+				}))
+			) {
+				await getNextEvaluationForJury(request, response);
+			} else {
+				response.status(401).send('You should be logged in.');
+			}
+
 			break;
 
 		default:
-			response.setHeader('Allow', ['POST', 'GET']);
+			response.setHeader('Allow', ['GET']);
 			response.status(405).end(`Method ${request.method ?? ''} Not Allowed`);
 	}
 }
