@@ -20,7 +20,7 @@ app.prepare().then(() => {
 			const {pathname, query} = parsedUrl;
 
 			if (pathname.startsWith('/media/')) {
-				const target = pathname.replace('/media/', '');
+				const target = pathname.replace('/media/', '').replace('..', '');
 				const filePath = path.join(process.env.MEDIA_PATH, target);
 				const stat = fs.statSync(filePath);
 
@@ -33,10 +33,6 @@ app.prepare().then(() => {
 				readStream.pipe(response);
 				return;
 			}
-
-			await (pathname === '/b'
-				? app.render(request, response, '/b', query)
-				: handle(request, response, parsedUrl));
 		} catch (error) {
 			console.error('Error occurred handling', request.url, error);
 			response.statusCode = 500;
