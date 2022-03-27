@@ -26,9 +26,13 @@ model Team {
   resetPasswordToken        String?
   resetPasswordConsentToken String?
 
-  evaluationsA        Evaluation[] @relation("evaluationA")
-  evaluationsB        Evaluation[] @relation("evaluationB")
-  assignedEvaluations Evaluation[] @relation("assignedEvaluation")
+  evaluationsA          Evaluation[]           @relation("evaluationA")
+  evaluationsB          Evaluation[]           @relation("evaluationB")
+  assignedEvaluations   Evaluation[]           @relation("assignedEvaluation")
+  controlPairCandidateA ControlPairCandidate[] @relation("controlPairCandidateA")
+  controlPairCandidateB ControlPairCandidate[] @relation("controlPairCandidateB")
+  ControlPairA          ControlPair[]          @relation("controlPairA")
+  ControlPairB          ControlPair[]          @relation("controlPairB")
 }
 
 model TeamMember {
@@ -105,6 +109,38 @@ model Evaluation {
 
   // Avoid double-booking problem
   version Int
+}
+
+model ControlPairCandidate {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  teamA   Team @relation("controlPairCandidateA", fields: [idTeamA], references: [id])
+  idTeamA Int
+  teamB   Team @relation("controlPairCandidateB", fields: [idTeamB], references: [id])
+  idTeamB Int
+
+  evaluationCriteria EvaluationCriteria
+  nicolasChoice      Boolean? // False = teamA, true = teamB
+  julesChoice        Boolean? // False = teamA, true = teamB
+
+  version Int
+
+  nicolasGoodCandidate Boolean
+  julesGoodCandidate   Boolean
+}
+
+model ControlPair {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  teamA   Team @relation("controlPairA", fields: [idTeamA], references: [id])
+  idTeamA Int
+  teamB   Team @relation("controlPairB", fields: [idTeamB], references: [id])
+  idTeamB Int
+
+  evaluationCriteria EvaluationCriteria
+  criteria           Boolean
 }
 
 enum EvaluationCriteria {

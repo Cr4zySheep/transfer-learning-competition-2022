@@ -235,7 +235,9 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 								<div style={{width: '90%', margin: 'auto'}}>
 									<img
 										loading="eager"
-										src={`/dataset/${currentEvaluation.name.split('/')[0]}.png`}
+										src={`/media/dataset/${
+											currentEvaluation.name.split('/')[0]
+										}.png`}
 										style={{width: '100%'}}
 									/>
 									<Typography paragraph>{currentEvaluation.name}</Typography>

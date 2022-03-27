@@ -159,7 +159,7 @@ async function getNextEvaluationForJury(
 				name: evaluationData.name,
 				idTeamA: evaluationData.idTeamA,
 				idTeamB: evaluationData.idTeamB,
-				assignedJuryId: jury.id,
+				assignedJuryId: jury.id, // TODO: Maybe use the jury provided by the evaluation
 				evaluationCriteria:
 					evaluationMapping[evaluationData.evaluationCriteria],
 				version: 0,

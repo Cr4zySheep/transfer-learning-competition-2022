@@ -21,7 +21,7 @@ app.prepare().then(() => {
 
 			if (pathname.startsWith('/media/')) {
 				const target = pathname.replace('/media/', '');
-				const filePath = path.join(process.env.SUBMISSION_PATH, target);
+				const filePath = path.join(process.env.MEDIA_PATH, target);
 				const stat = fs.statSync(filePath);
 
 				response.writeHead(200, {

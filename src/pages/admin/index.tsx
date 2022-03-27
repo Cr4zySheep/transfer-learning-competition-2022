@@ -23,7 +23,7 @@ import {
 } from 'services/admin';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
-import {Jury, PrismaClient, TeamMember} from '@prisma/client';
+import {ControlPair, Jury, PrismaClient, TeamMember} from '@prisma/client';
 import {
 	parseTeamWithMembersAndSubmissionToJson,
 	transformJsonToTeamWithMembersAndSubmissions,
@@ -32,6 +32,7 @@ import {Form, Formik} from 'formik';
 import TeamMemberForm from 'components/templates/inscription/TeamMemberForm';
 import {teamMemberRegistration} from 'schemas/teamRegistration';
 import * as yup from 'yup';
+import Link from 'next/link';
 
 const emptyMember = {
 	firstName: '',
@@ -47,6 +48,7 @@ const emptyMember = {
 interface AdminPageProps {
 	teams: TeamWithMembersAndSubmissionsJson[];
 	jurys: Jury[];
+	controlPairs: ControlPair[];
 }
 
 interface ButtonWithConfirmationProps extends ButtonProps {
@@ -98,7 +100,11 @@ const ButtonWithConfirmation: React.FunctionComponent<
 	);
 };
 
-const AdminPage: NextPage<AdminPageProps> = ({jurys, ...props}) => {
+const AdminPage: NextPage<AdminPageProps> = ({
+	jurys,
+	controlPairs,
+	...props
+}) => {
 	const [teams, setTeams] = useState<
 		Array<Omit<TeamWithMembersAndSubmissions, 'password'>>
 	>(
@@ -125,7 +131,37 @@ const AdminPage: NextPage<AdminPageProps> = ({jurys, ...props}) => {
 
 	return (
 		<Container>
-			<Typography variant="h4">Liste des jurys</Typography>
+			<Typography gutterBottom variant="h4">
+				Paires de contrôle
+			</Typography>
+			<Grid container spacing={2}>
+				<Grid item>
+					<Link passHref href="/admin/control-pairs-candidate/nicolas">
+						<Button variant="contained">Lien pour Nicolas</Button>
+					</Link>
+				</Grid>
+				<Grid item>
+					<Link passHref href="/admin/control-pairs-candidate/jules">
+						<Button variant="contained">Lien pour Jules</Button>
+					</Link>
+				</Grid>
+			</Grid>
+
+			<ul>
+				{controlPairs.map(
+					({id, name, idTeamA, idTeamB, evaluationCriteria, criteria}) => (
+						<li key={id}>
+							<a href={`/media/team-${idTeamA}/${name}.png`}>Image gauche</a>,{' '}
+							<a href={`/media/team-${idTeamB}/${name}.png`}>Image droite</a>,{' '}
+							{evaluationCriteria}, {criteria ? 'Droite' : 'Gauche'}
+						</li>
+					),
+				)}
+			</ul>
+
+			<Typography variant="h4" sx={{marginTop: 2}}>
+				Liste des jurys
+			</Typography>
 			<ul>
 				{jurys.map((jury) => (
 					<li key={jury.id}>
@@ -394,5 +430,7 @@ export const getServerSideProps = withIronSessionSsr(async ({req}) => {
 
 	const jurys = await prisma.jury.findMany();
 
-	return {props: {teams, jurys}};
+	const controlPairs = await prisma.controlPair.findMany();
+
+	return {props: {teams, jurys, controlPairs}};
 }, sessionOptions);

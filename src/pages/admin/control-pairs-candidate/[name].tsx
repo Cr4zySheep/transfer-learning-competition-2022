@@ -10,7 +10,10 @@ import {
 	DialogContentText,
 	DialogProps,
 	DialogTitle,
+	FormControlLabel,
+	FormGroup,
 	Grid,
+	Switch,
 	Typography,
 } from '@mui/material';
 import {NextPage} from 'next';
@@ -18,15 +21,18 @@ import Link from 'next/link';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {
-	chooseEvaluation,
-	fetchNextAssignedEvaluations,
-} from 'services/evaluations';
-import {Evaluation, EvaluationCriteria} from '@prisma/client';
+	ControlPairCandidate,
+	EvaluationCriteria,
+	PrismaClient,
+} from '@prisma/client';
 import Image from 'next/image';
-import {getNbRemainingEvaluations} from 'lib/team';
-import {PARTICIPANT_EVALUATION_END, VARIATION_TEXTS} from 'consts';
+import {VARIATION_TEXTS} from 'consts';
 import Head from 'next/head';
 import {useRouter} from 'next/router';
+import {
+	chooseControlPairCandidate,
+	fetchNextControlPairs,
+} from 'services/controlPairs';
 
 interface VariationDescProps {
 	variation: string;
@@ -77,9 +83,11 @@ const InstructionsDialog = (props: DialogProps) => {
 	return (
 		<Dialog {...props} fullWidth maxWidth="sm">
 			<DialogTitle>How to evaluate a sample?</DialogTitle>
+
 			<DialogContent>
 				<DialogContentText>TEXT TEXT</DialogContentText>
 			</DialogContent>
+
 			<DialogActions>
 				<Button
 					variant="contained"
@@ -94,65 +102,42 @@ const InstructionsDialog = (props: DialogProps) => {
 	);
 };
 
-const TaskFinishedDialog = (props: DialogProps) => {
-	const router = useRouter();
-
-	return (
-		<Dialog
-			{...props}
-			fullWidth
-			maxWidth="sm"
-			onClose={async () => {
-				await router.push('/my-team');
-			}}
-		>
-			<DialogTitle>Evaluation finished!</DialogTitle>
-			<DialogContent>
-				<DialogContentText>
-					Your team has evaluated enough samples in order to qualify.
-				</DialogContentText>
-			</DialogContent>
-			<DialogActions>
-				<Link passHref href="/my-team">
-					<Button variant="contained">Continue</Button>
-				</Link>
-			</DialogActions>
-		</Dialog>
-	);
-};
-
 interface EvaluationPageProps {
-	initialNbRemainingEvaluations: number;
+	initialNbControlPairs: number;
 }
 
 const EvaluationPage: NextPage<EvaluationPageProps> = ({
-	initialNbRemainingEvaluations,
+	initialNbControlPairs,
 }) => {
-	const [nbRemainingEvaluations, setRemainingEvaluations] = useState(
-		initialNbRemainingEvaluations,
-	);
+	const [nbControlPairs, setNbControlPairs] = useState(initialNbControlPairs);
+	const name = useRouter().query.name as string;
 	const [showInstructions, setShowInstructions] = useState(true);
-	const [showTaskFinishedDialog, setShowTaskFinishedDialog] = useState(false);
 	const [showCriteriaDialog, setShowCriteriaDialog] = useState(true);
 
-	const [fetchedEvaluations, setFetchedEvaluations] = useState<Evaluation[]>(
-		[],
-	);
+	const [fetchedControlPairCandidates, setFetchedControlPairCandidates] =
+		useState<ControlPairCandidate[]>([]);
+
+	const [goodCandidate, setGoodCandidate] = useState(false);
 
 	useEffect(() => {
-		if (fetchedEvaluations.length < 2 && nbRemainingEvaluations > 0) {
-			fetchNextAssignedEvaluations(fetchedEvaluations[0]?.id)
+		if (fetchedControlPairCandidates.length < 2) {
+			fetchNextControlPairs(name, fetchedControlPairCandidates[0]?.id)
 				.then((data) => {
-					setFetchedEvaluations([...fetchedEvaluations, data]);
+					setFetchedControlPairCandidates([
+						...fetchedControlPairCandidates,
+						data,
+					]);
 				})
 				.catch((error) => {
 					console.error(error);
 				});
 		}
-	}, [fetchedEvaluations, nbRemainingEvaluations]);
+	}, [fetchedControlPairCandidates]);
 
-	const currentEvaluation = fetchedEvaluations[0];
-	const nextEvaluation = fetchedEvaluations[1];
+	const currentEvaluation = fetchedControlPairCandidates[0];
+	const nextEvaluation = fetchedControlPairCandidates[1];
+
+	console.log(currentEvaluation, nextEvaluation);
 
 	const [disabled, setDisabled] = useState(false);
 	const timeoutRef = useRef<NodeJS.Timeout>();
@@ -167,37 +152,35 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 	const selectImage = async (choice: boolean): Promise<void> => {
 		if (!currentEvaluation) return;
 
-		setDisabled(true);
-		chooseEvaluation(currentEvaluation.id, choice)
+		chooseControlPairCandidate(
+			currentEvaluation.id,
+			name,
+			choice,
+			goodCandidate,
+		)
 			.then((x) => {
-				setRemainingEvaluations(x);
-				if (x <= 0) {
-					setShowTaskFinishedDialog(true);
-				}
+				setNbControlPairs(x);
 			})
 			.catch((error) => {
-				console.log(error);
+				console.error(error);
 			});
 
-		// This isn't the last evaluations. This assumption can be false when another team member already finished everything.
-		if (nbRemainingEvaluations > 1) {
-			if (
-				currentEvaluation.evaluationCriteria !==
-				nextEvaluation?.evaluationCriteria
-			) {
-				setShowCriteriaDialog(true);
-			}
-
-			setFetchedEvaluations((previousFetchedEvaluations) =>
-				previousFetchedEvaluations.slice(1),
-			);
-
-			timeoutRef.current = setTimeout(() => {
-				setDisabled(false);
-			}, 1000);
-		} else {
-			setShowTaskFinishedDialog(true);
+		if (
+			currentEvaluation.evaluationCriteria !==
+			nextEvaluation?.evaluationCriteria
+		) {
+			setShowCriteriaDialog(true);
 		}
+
+		setGoodCandidate(false);
+		setFetchedControlPairCandidates((previousFetchedEvaluations) =>
+			previousFetchedEvaluations.slice(1),
+		);
+
+		setDisabled(true);
+		timeoutRef.current = setTimeout(() => {
+			setDisabled(false);
+		}, 1000);
 	};
 
 	return (
@@ -212,8 +195,6 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 					setShowInstructions(false);
 				}}
 			/>
-
-			<TaskFinishedDialog open={showTaskFinishedDialog} />
 
 			{currentEvaluation && (
 				<CriteriaInformationDialog
@@ -238,11 +219,11 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 						sx={{paddingTop: 2, marginBottom: 2}}
 					>
 						<Typography variant="h4">
-							Remaining evaluations: {Math.max(nbRemainingEvaluations, 0)}
+							Number of control pairs: {nbControlPairs}
 						</Typography>
 
 						<Grid item>
-							<Link passHref href="/my-team">
+							<Link passHref href="/jury">
 								<Button variant="outlined">Stop evaluating</Button>
 							</Link>
 						</Grid>
@@ -284,6 +265,19 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 									<VariationDesc
 										variation={currentEvaluation.name.split('/')[1]}
 									/>
+									<FormGroup>
+										<FormControlLabel
+											control={
+												<Switch
+													checked={goodCandidate}
+													onChange={(_, value) => {
+														setGoodCandidate(value);
+													}}
+												/>
+											}
+											label="Good control pair"
+										/>
+									</FormGroup>
 								</div>
 							</Grid>
 
@@ -302,12 +296,6 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 										if (!disabled) await selectImage(true);
 									}}
 								/>
-								{/* <Image
-							unoptimized
-							loader={({src}) => src}
-							layout="fill"
-							objectFit="contain"
-						/> */}
 							</Grid>
 						</Grid>
 					)}
@@ -348,48 +336,39 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 	);
 };
 
-export const getServerSideProps = withIronSessionSsr(async ({req: request}) => {
-	if (!request.session.team) {
-		return {
-			redirect: {
-				destination: '/login',
-				permanent: false,
-			},
-		};
-	}
+export const getServerSideProps = withIronSessionSsr(
+	async ({req: request, params}) => {
+		if (
+			!params?.name ||
+			!['nicolas', 'jules'].includes(params.name as string)
+		) {
+			return {redirect: {destination: '/admin', permanent: false}};
+		}
 
-	const now = new Date();
-	if (now > PARTICIPANT_EVALUATION_END) {
-		return {
-			redirect: {
-				destination: '/my-team',
-				permanent: false,
-			},
-		};
-	}
-
-	try {
-		const nbRemainingEvaluations = await getNbRemainingEvaluations(
-			request.session.team.id,
-		);
-
-		if (nbRemainingEvaluations <= 0)
+		if (!request.session.jury) {
 			return {
 				redirect: {
-					destination: '/my-team',
+					destination: '/admin/login',
 					permanent: false,
 				},
 			};
+		}
 
-		return {props: {initialNbRemainingEvaluations: nbRemainingEvaluations}};
-	} catch {
-		return {
-			redirect: {
-				destination: '/login',
-				permanent: false,
-			},
-		};
-	}
-}, sessionOptions);
+		try {
+			const prisma = new PrismaClient();
+			const initialNbControlPairs = await prisma.controlPair.count();
+
+			return {props: {initialNbControlPairs}};
+		} catch {
+			return {
+				redirect: {
+					destination: '/admin/login',
+					permanent: false,
+				},
+			};
+		}
+	},
+	sessionOptions,
+);
 
 export default EvaluationPage;
