@@ -6,7 +6,6 @@ import {Box, Container, Divider, Typography} from '@mui/material';
 import Image from 'next/image';
 
 import competitionBanner from 'assets/competition_banner.png';
-import TeamRegistrationForm from 'components/templates/inscription/TeamRegistrationForm';
 
 const TeamRegistrationPage: NextPage = () => {
 	return (
@@ -22,7 +21,7 @@ const TeamRegistrationPage: NextPage = () => {
 
 			<Typography variant="h3">Registration is closed.</Typography>
 
-			<TeamRegistrationForm />
+			{/* <TeamRegistrationForm /> */}
 		</Container>
 	);
 };
