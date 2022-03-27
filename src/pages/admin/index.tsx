@@ -19,6 +19,8 @@ import {
 	addNewTeamMember,
 	deleteTeam,
 	generateNewEmailValidationToken,
+	syncTop3,
+	syncValidSubmission,
 	updateTeamMember,
 } from 'services/admin';
 import {withIronSessionSsr} from 'iron-session/next';
@@ -146,7 +148,6 @@ const AdminPage: NextPage<AdminPageProps> = ({
 					</Link>
 				</Grid>
 			</Grid>
-
 			<ul>
 				{controlPairs.map(
 					({id, name, idTeamA, idTeamB, evaluationCriteria, criteria}) => (
@@ -158,7 +159,6 @@ const AdminPage: NextPage<AdminPageProps> = ({
 					),
 				)}
 			</ul>
-
 			<Typography variant="h4" sx={{marginTop: 2}}>
 				Liste des jurys
 			</Typography>
@@ -176,9 +176,34 @@ const AdminPage: NextPage<AdminPageProps> = ({
 					</li>
 				))}
 			</ul>
-
-			<Typography variant="h4">Liste des équipes</Typography>
-
+			<Typography gutterBottom variant="h4">
+				Liste des équipes
+			</Typography>
+			<Button
+				variant="outlined"
+				onClick={async () =>
+					syncValidSubmission().then((data) => {
+						setTeams(
+							data.map((x) => transformJsonToTeamWithMembersAndSubmissions(x)),
+						);
+					})
+				}
+			>
+				Sync team with valid submission
+			</Button>
+			<br /> <br />
+			<Button
+				variant="outlined"
+				onClick={async () =>
+					syncTop3().then((data) => {
+						setTeams(
+							data.map((x) => transformJsonToTeamWithMembersAndSubmissions(x)),
+						);
+					})
+				}
+			>
+				Sync top 3
+			</Button>
 			<Dialog
 				fullWidth
 				open={Boolean(teamMember)}
@@ -256,7 +281,6 @@ const AdminPage: NextPage<AdminPageProps> = ({
 					</Formik>
 				</DialogContent>
 			</Dialog>
-
 			<Dialog
 				fullWidth
 				open={Boolean(selectedTeamId)}
@@ -322,13 +346,23 @@ const AdminPage: NextPage<AdminPageProps> = ({
 					</Formik>
 				</DialogContent>
 			</Dialog>
-
 			<ul>
 				{teams.map((team) => (
 					<li key={team.id}>
-						Team #{team.id} {team.firstYearOnly && ' - First year only'}
+						Team #{team.id} {team.firstYearOnly && ' - First year only'}{' '}
+						{team.isTop3 && 'Top 3'}
 						<br />
-						{team.submissions.length} submissions
+						{team.submissions.length} submissions{' '}
+						{team.hasValidSubmission
+							? '(Valid submission files)'
+							: '(Invalid submission files)'}
+						<ul>
+							{team.submissions.map(({id, fileName, submittedAt}) => (
+								<li key={id}>
+									{fileName} - {submittedAt.toLocaleDateString()}
+								</li>
+							))}
+						</ul>
 						<br />
 						{team.members.length < 4 && (
 							<Button

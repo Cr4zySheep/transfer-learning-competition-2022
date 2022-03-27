@@ -223,7 +223,7 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 						</Typography>
 
 						<Grid item>
-							<Link passHref href="/jury">
+							<Link passHref href="/admin">
 								<Button variant="outlined">Stop evaluating</Button>
 							</Link>
 						</Grid>
@@ -345,7 +345,7 @@ export const getServerSideProps = withIronSessionSsr(
 			return {redirect: {destination: '/admin', permanent: false}};
 		}
 
-		if (!request.session.jury) {
+		if (!request.session.admin) {
 			return {
 				redirect: {
 					destination: '/admin/login',
