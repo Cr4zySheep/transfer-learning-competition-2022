@@ -6,7 +6,7 @@ import type {IronSessionOptions} from 'iron-session';
 // TODO: Rename cookie
 export const sessionOptions: IronSessionOptions = {
 	password:
-		'random_passwordrandom_passwordrandom_passwordrandom_passwordrandom_password', // TODO: Use process.env.SECRET_COOKIE_PASSWORD!,
+		'random_passwordrandom_passwordrandom_passwordrandom_passwordrandom_password_new', // TODO: Use process.env.SECRET_COOKIE_PASSWORD!,
 	cookieName: 'iron-session/examples/next.js',
 	cookieOptions: {
 		secure: process.env.NODE_ENV === 'production',
@@ -18,7 +18,7 @@ declare module 'iron-session' {
 	interface IronSessionData {
 		team?: {
 			id: number;
-			// TODO: Ajouter teamMemberId
+			memberId: number;
 		};
 		admin?: boolean;
 		jury?: {id: number};

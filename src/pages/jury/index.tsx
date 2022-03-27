@@ -30,7 +30,20 @@ const JuryHomePage: NextPage<JuryHomePageProps> = ({active}) => {
 				</Grid>
 			</Grid>
 
-			<Typography paragraph>TEXT</Typography>
+			<Typography paragraph>
+				Dear committee member,
+				<br />
+				<br />
+				Thank you for helping us review the top 3 of this competition&apos;s two
+				leaderboards.
+				<br />
+				<br />
+				First of all, please watch the following explanatory video :{' '}
+				<strong>LINK</strong>
+				<br />
+				<br />
+				Then, click the button below to start evaluating !
+			</Typography>
 
 			<Typography paragraph>Number of evaluations done: {counter}</Typography>
 

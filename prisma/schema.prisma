@@ -25,6 +25,10 @@ model Team {
   // Fields use for resetting password
   resetPasswordToken        String?
   resetPasswordConsentToken String?
+
+  evaluationsA        Evaluation[] @relation("evaluationA")
+  evaluationsB        Evaluation[] @relation("evaluationB")
+  assignedEvaluations Evaluation[] @relation("assignedEvaluation")
 }
 
 model TeamMember {
@@ -49,6 +53,8 @@ model TeamMember {
 
   team   Team @relation(fields: [teamId], references: [id])
   teamId Int
+
+  assignedEvaluations Evaluation[]
 }
 
 model Submission {
@@ -68,4 +74,47 @@ model Jury {
   password  String @default("")
 
   resetPasswordToken String?
+
+  assignedEvaluations Evaluation[]
+}
+
+model Evaluation {
+  id     Int              @id @default(autoincrement())
+  name   String
+  status EvaluationStatus @default(PENDING)
+
+  // Evaluation information
+  teamA   Team @relation("evaluationA", fields: [idTeamA], references: [id])
+  idTeamA Int
+  teamB   Team @relation("evaluationB", fields: [idTeamB], references: [id])
+  idTeamB Int
+
+  // Who should do the evaluation?
+  assignedTeam         Team?       @relation("assignedEvaluation", fields: [assignedTeamId], references: [id])
+  assignedTeamId       Int?
+  assignedTeamMember   TeamMember? @relation(fields: [assignedTeamMemberId], references: [id])
+  assignedTeamMemberId Int?
+  assignedJury         Jury?       @relation(fields: [assignedJuryId], references: [id])
+  assignedJuryId       Int?
+
+  // Evaluation criteria
+  evaluationCriteria EvaluationCriteria
+  criteria0          Boolean? // False = teamA, true = teamB
+  criteria1          Boolean? // False = teamA, true = teamB
+  criteria2          Boolean? // False = teamA, true = teamB
+
+  // Avoid double-booking problem
+  version Int
+}
+
+enum EvaluationCriteria {
+  CRITERIA_0
+  CRITERIA_1
+  CRITERIA_2
+  ALL
+}
+
+enum EvaluationStatus {
+  PENDING
+  DONE
 }

@@ -24,6 +24,7 @@ import {sessionOptions} from 'lib/session';
 import {Formik, Form} from 'formik';
 import Link from 'next/link';
 import {
+	getNbRemainingEvaluations,
 	parseTeamWithMembersAndSubmissionToJson,
 	transformJsonToTeamWithMembersAndSubmissions,
 } from 'lib/team';
@@ -37,7 +38,6 @@ import {postSubmission} from 'services/team';
 import * as yup from 'yup';
 import CheckboxField from 'components/Checkbox';
 import {
-	NB_EVALUATIONS_PER_MEMBER,
 	NB_MAX_SUBMISSIONS,
 	PARTICIPANT_EVALUATION_END,
 	PARTICIPANT_EVALUATION_START,
@@ -131,9 +131,7 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 	const [showProgressDialog, setShowProgressDialog] = useState(false);
 	const [showSnackbar, setShowSnackbar] = useState(false);
 
-	const counter = initialNbOfEvaluations;
-	const total = NB_EVALUATIONS_PER_MEMBER * team.members.length;
-	const nbRemainingEvaluations = total - counter;
+	const nbRemainingEvaluations = initialNbOfEvaluations;
 
 	return (
 		<Container>
@@ -382,11 +380,19 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 					<Typography gutterBottom variant="h4">
 						Evaluation
 					</Typography>
-					<Typography paragraph>TEXT 1</Typography>
 					{nbRemainingEvaluations > 0 ? (
 						<>
 							<Typography paragraph>
-								Remaining evaluations: {total - counter}
+								Before your submission is accepted, you need to help us with the
+								evaluation procedure.
+								<br />
+								First of all, please watch the following explanatory video :{' '}
+								<strong>LINK</strong>
+								<br />
+								Then, click the button below to start evaluating !
+							</Typography>
+							<Typography paragraph>
+								Remaining evaluations: {nbRemainingEvaluations}
 							</Typography>
 							<Link passHref href="/my-team/evaluation">
 								<Button variant="outlined">Evaluate some samples</Button>
@@ -501,8 +507,7 @@ export const getServerSideProps = withIronSessionSsr(async ({req: request}) => {
 				canEvaluate:
 					PARTICIPANT_EVALUATION_START <= now &&
 					now <= PARTICIPANT_EVALUATION_END,
-				// TODO: Fetch this information from the database
-				initialNbOfEvaluations: 20,
+				initialNbOfEvaluations: await getNbRemainingEvaluations(team.id),
 			},
 		};
 	} catch {

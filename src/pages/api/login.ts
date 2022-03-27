@@ -15,18 +15,21 @@ const loginRoute = async (
 	switch (request.method) {
 		case 'POST': {
 			const data = request.body as LoginData;
-			const team = await prisma.team.findFirst({
+
+			const member = await prisma.teamMember.findFirst({
 				where: {
-					members: {
-						some: {
-							email: data.email,
-							NOT: {emailValidated: null},
-						},
-					},
+					email: data.email,
+					NOT: {emailValidated: null},
+				},
+				include: {
+					team: true,
 				},
 			});
 
-			if (!team || !(await bcrypt.compare(data.password, team.password))) {
+			if (
+				!member ||
+				!(await bcrypt.compare(data.password, member.team.password))
+			) {
 				response
 					.status(400)
 					.end("This email and password isn't linked to any team.");
@@ -35,7 +38,8 @@ const loginRoute = async (
 
 			// Then, get user from database then:
 			request.session.team = {
-				id: team.id,
+				id: member.teamId,
+				memberId: member.id,
 			};
 			await request.session.save();
 			response.send('');
