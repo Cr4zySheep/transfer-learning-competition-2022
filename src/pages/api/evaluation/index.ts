@@ -1,33 +1,10 @@
-import process from 'node:process';
-import {
-	EvaluationStatus,
-	Evaluation,
-	EvaluationCriteria,
-	PrismaClient,
-	Prisma,
-} from '@prisma/client';
-import axios from 'axios';
+import {EvaluationStatus, Evaluation, PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {NextApiRequest, NextApiResponse} from 'next';
+import {replenishBufferForJury, replenishBufferForTeam} from 'utils';
 
 const prisma = new PrismaClient();
-
-interface EvaluationData {
-	name: string;
-	idTeamA: number;
-	idTeamB: number;
-	assignedTeamId: number;
-	assignedTeamMemberId: number;
-	evaluationCriteria: 0 | 1 | 2 | 3;
-}
-
-const evaluationMapping = [
-	EvaluationCriteria.CRITERIA_0,
-	EvaluationCriteria.CRITERIA_1,
-	EvaluationCriteria.CRITERIA_2,
-	EvaluationCriteria.ALL,
-];
 
 const isScriptRunning: Record<number, boolean> = {};
 
@@ -90,36 +67,45 @@ async function getNextEvaluationForTeam(
 			});
 		} else {
 			isScriptRunning[team.id] = true;
-			const evaluationsData = await axios
-				.post<{evaluations: EvaluationData[]}>(
-					`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
-					{
-						teamId: team.id,
-						teamMemberId: team.memberId,
-					},
-				)
-				.then((response) => response.data.evaluations);
+			try {
+				await replenishBufferForTeam(team);
+			} catch (error: unknown) {
+				console.log();
+				console.log('Errors while fetching evaluation for team', team);
+				console.log(error);
+				await new Promise((resolve) => {
+					setTimeout(resolve, 1000);
+				});
+			}
 
-			const data = {
-				data: evaluationsData.map((evaluationData) => ({
-					name: evaluationData.name,
-					idTeamA: evaluationData.idTeamA,
-					idTeamB: evaluationData.idTeamB,
-					assignedTeamId: evaluationData.assignedTeamId,
-					assignedTeamMemberId: evaluationData.assignedTeamMemberId,
-					evaluationCriteria:
-						evaluationMapping[evaluationData.evaluationCriteria],
-					version: 0,
-				})),
-			};
-
-			await prisma.evaluation.createMany(data);
 			isScriptRunning[team.id] = false;
 		}
 		/* eslint-enable no-await-in-loop */
 	} while (!evaluation);
 
 	response.send(evaluation);
+
+	const nbBuffer = await prisma.evaluation.count({
+		where: {
+			assignedTeamId: team.id,
+			criteria0: null,
+			criteria1: null,
+		},
+	});
+
+	// Too low buffer, replenish it
+	if (nbBuffer < 4 && !isScriptRunning[team.id]) {
+		isScriptRunning[team.id] = true;
+		try {
+			await replenishBufferForTeam(team);
+		} catch (error: unknown) {
+			console.log();
+			console.log('Errors while fetching evaluation for team', team);
+			console.log(error);
+		}
+
+		isScriptRunning[team.id] = false;
+	}
 }
 
 async function getNextEvaluationForJury(
@@ -145,31 +131,40 @@ async function getNextEvaluationForJury(
 
 		if (evaluation) continue;
 
-		const evaluationsData = await axios
-			.post<{evaluations: EvaluationData[]}>(
-				`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
-				{
-					juryId: jury.id,
-				},
-			)
-			.then((response) => response.data.evaluations);
+		try {
+			await replenishBufferForJury(jury.id);
+		} catch (error: unknown) {
+			console.log();
+			console.log('Errors while fetching evaluation for jury', jury);
+			console.log(error);
+			await new Promise((resolve) => {
+				setTimeout(resolve, 1000);
+			});
+		}
 
-		const data: Prisma.EvaluationCreateManyInput[] = evaluationsData.map(
-			(evaluationData) => ({
-				name: evaluationData.name,
-				idTeamA: evaluationData.idTeamA,
-				idTeamB: evaluationData.idTeamB,
-				assignedJuryId: jury.id, // TODO: Maybe use the jury provided by the evaluation
-				evaluationCriteria:
-					evaluationMapping[evaluationData.evaluationCriteria],
-				version: 0,
-			}),
-		);
-		await prisma.evaluation.createMany({data});
 		/* eslint-enable no-await-in-loop */
 	} while (!evaluation);
 
 	response.send(evaluation);
+
+	const nbBuffer = await prisma.evaluation.count({
+		where: {
+			assignedJuryId: jury.id,
+			criteria0: null,
+			criteria1: null,
+		},
+	});
+
+	// Too low buffer, replenish it
+	if (nbBuffer < 3) {
+		try {
+			await replenishBufferForJury(jury.id);
+		} catch (error: unknown) {
+			console.log();
+			console.log('Errors while fetching evaluation for jury', jury);
+			console.log(error);
+		}
+	}
 }
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {

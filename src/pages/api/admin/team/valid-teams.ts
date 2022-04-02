@@ -7,13 +7,28 @@ import {sessionOptions} from 'lib/session';
 import isAdmin from 'middlewares/isAdmin';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {parseTeamWithMembersAndSubmissionToJson} from 'lib/team';
+import axios from 'axios';
 
 const prisma = new PrismaClient();
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {
 	switch (request.method) {
 		case 'GET': {
-			const teams = await prisma.team.findMany({});
+			const teams = await prisma.team.findMany({
+				include: {members: true, submissions: {orderBy: {submittedAt: 'desc'}}},
+			});
+
+			await axios.post(
+				`${process.env.PYTHON_SERVER ?? ''}/valid-teams`,
+				teams.map((team) => ({
+					teamId: team.id,
+					participants: team.members.map((member) => member.id),
+					submissions: team.submissions.map(
+						(submission) => submission.fileName,
+					),
+					first_year: team.firstYearOnly,
+				})),
+			);
 
 			await Promise.all(
 				teams.map(async (team) => {

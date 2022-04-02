@@ -52,3 +52,7 @@ export async function syncTop3() {
 		.get<TeamWithMembersAndSubmissionsJson[]>('/api/admin/team/get-top3')
 		.then((response) => response.data);
 }
+
+export async function syncTop1() {
+	return axios.get('/api/admin/team/get-top1');
+}

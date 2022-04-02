@@ -20,6 +20,7 @@ import {
 	deleteTeam,
 	generateNewEmailValidationToken,
 	syncTop3,
+	syncTop1,
 	syncValidSubmission,
 	updateTeamMember,
 } from 'services/admin';
@@ -203,6 +204,10 @@ const AdminPage: NextPage<AdminPageProps> = ({
 				}
 			>
 				Sync top 3
+			</Button>
+			<br /> <br />
+			<Button variant="outlined" onClick={async () => syncTop1()}>
+				Sync top 1
 			</Button>
 			<Dialog
 				fullWidth

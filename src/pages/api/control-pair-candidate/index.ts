@@ -1,30 +1,22 @@
 import process from 'node:process';
-import {
-	EvaluationCriteria,
-	PrismaClient,
-	Prisma,
-	ControlPairCandidate,
-} from '@prisma/client';
+import {Prisma, ControlPairCandidate} from '@prisma/client';
 import axios from 'axios';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {NextApiRequest, NextApiResponse} from 'next';
-
-const prisma = new PrismaClient();
+import {
+	evaluationCriteriaToLabel,
+	getControlPairs,
+	labelToEvaluationCriteria,
+} from 'utils';
+import {prisma} from 'db';
 
 interface ControlPairCandidateData {
 	name: string;
 	idTeamA: number;
 	idTeamB: number;
-	evaluationCriteria: 0 | 1 | 2 | 3;
+	evaluationCriteria: 'realistic' | 'targeted';
 }
-
-const evaluationMapping = [
-	EvaluationCriteria.CRITERIA_0,
-	EvaluationCriteria.CRITERIA_1,
-	EvaluationCriteria.CRITERIA_2,
-	EvaluationCriteria.ALL,
-];
 
 const nameToChoiceField: Record<string, 'nicolasChoice' | 'julesChoice'> = {
 	nicolas: 'nicolasChoice',
@@ -66,25 +58,54 @@ async function getNextControlPairCandidate(
 			});
 		} else {
 			isScriptRunning = true;
-			const controlPairCandidatesData = await axios
-				.post<ControlPairCandidateData[]>(
-					`${process.env.PYTHON_SERVER ?? ''}/control-pair-candidates`,
-				)
-				.then((response) => response.data);
 
-			const data: Prisma.ControlPairCandidateCreateManyInput[] =
-				controlPairCandidatesData.map((evaluationData) => ({
-					name: evaluationData.name,
-					idTeamA: evaluationData.idTeamA,
-					idTeamB: evaluationData.idTeamB,
-					evaluationCriteria:
-						evaluationMapping[evaluationData.evaluationCriteria],
-					version: 0,
-					nicolasGoodCandidate: false,
-					julesGoodCandidate: false,
+			try {
+				// Fetch all candidates
+				const candidatesData = await prisma.controlPairCandidate.findMany({});
+				const candidates = candidatesData.map((candidate) => ({
+					id: candidate.id,
+					name: candidate.name,
+					idTeamA: candidate.idTeamA,
+					idTeamB: candidate.idTeamB,
+					evaluationCriteria: evaluationCriteriaToLabel(
+						candidate.evaluationCriteria,
+					),
 				}));
 
-			await prisma.controlPairCandidate.createMany({data});
+				// Fetch all control pair
+				const controlPairs = await getControlPairs();
+
+				// Get new candidates
+				const controlPairCandidatesData = await axios
+					.post<ControlPairCandidateData[]>(
+						`${process.env.PYTHON_SERVER ?? ''}/control-pair-candidates`,
+						{candidates, controlPairs},
+					)
+					.then((response) => response.data);
+
+				const data: Prisma.ControlPairCandidateCreateManyInput[] =
+					controlPairCandidatesData.map((evaluationData) => ({
+						name: evaluationData.name,
+						idTeamA: evaluationData.idTeamA,
+						idTeamB: evaluationData.idTeamB,
+						evaluationCriteria: labelToEvaluationCriteria(
+							evaluationData.evaluationCriteria,
+						),
+						version: 0,
+						nicolasGoodCandidate: false,
+						julesGoodCandidate: false,
+					}));
+
+				await prisma.controlPairCandidate.createMany({data});
+			} catch (error: unknown) {
+				console.log();
+				console.log('Error while fetching control pairs candidates');
+				console.log(error);
+				await new Promise((resolve) => {
+					setTimeout(resolve, 1000);
+				});
+			}
+
 			isScriptRunning = false;
 		}
 		/* eslint-enable no-await-in-loop */

@@ -1,52 +1,28 @@
 import process from 'node:process';
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import isAdmin from 'middlewares/isAdmin';
 import {NextApiRequest, NextApiResponse} from 'next';
-import {parseTeamWithMembersAndSubmissionToJson} from 'lib/team';
 import axios from 'axios';
-import {getControlPairs, getEvaluationDataForTeams} from 'utils';
-
-const prisma = new PrismaClient();
+import {getControlPairs, getEvaluationDataForJury} from 'utils';
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {
 	switch (request.method) {
 		case 'GET': {
 			const [controlPairs, evaluationData] = await Promise.all([
 				getControlPairs(),
-				getEvaluationDataForTeams(),
+				getEvaluationDataForJury(),
 			]);
 
-			const idsTop3 = await axios
+			const ids = await axios
 				.post<number[]>(`${process.env.PYTHON_SERVER ?? ''}/top3`, {
 					controlPairs,
 					evaluationData,
 				})
 				.then((response) => response.data);
 
-			await prisma.team.updateMany({
-				where: {id: {in: idsTop3}},
-				data: {isTop3: true},
-			});
-
-			await prisma.team.updateMany({
-				where: {id: {notIn: idsTop3}},
-				data: {isTop3: false},
-			});
-
-			const updatedTeams = await prisma.team
-				.findMany({
-					include: {
-						members: true,
-						submissions: {orderBy: {submittedAt: 'desc'}},
-					},
-				})
-				.then((data) =>
-					data.map((team) => parseTeamWithMembersAndSubmissionToJson(team)),
-				);
-
-			response.send(updatedTeams);
+			console.log(ids);
+			response.send('OK');
 			break;
 		}
 

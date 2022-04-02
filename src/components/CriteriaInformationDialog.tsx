@@ -19,7 +19,12 @@ const CriteriaInformationDialog: React.FunctionComponent<
 > = ({criteria, ...props}) => {
 	return (
 		<Dialog {...props} fullWidth maxWidth="sm">
-			<DialogTitle>Criteria: {criteria}</DialogTitle>
+			<DialogTitle>
+				Criteria:{' '}
+				{criteria === EvaluationCriteria.CRITERIA_0
+					? 'face realism'
+					: 'edition quality'}
+			</DialogTitle>
 
 			<DialogContent>
 				<DialogContentText>

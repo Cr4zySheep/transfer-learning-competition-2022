@@ -1,10 +1,10 @@
 import crypto from 'node:crypto';
 import process from 'node:process';
-import {EvaluationCriteria, PrismaClient, TeamMember} from '@prisma/client';
+import {EvaluationCriteria, TeamMember} from '@prisma/client';
 import nodemailer from 'nodemailer';
 import {MAIL_SENDER} from 'consts';
-
-const prisma = new PrismaClient();
+import axios from 'axios';
+import {prisma} from './db';
 
 export function getMailTransport() {
 	return nodemailer.createTransport({
@@ -241,4 +241,149 @@ export function labelToEvaluationCriteria(label: string) {
 
 	console.log('Unknown label:', label);
 	return EvaluationCriteria.CRITERIA_0;
+}
+
+export async function getControlPairs() {
+	const controlPairsData = await prisma.controlPair.findMany({});
+	const controlPairs = controlPairsData.map((controlPair) => ({
+		id: controlPair.id,
+		name: controlPair.name,
+		idTeamA: controlPair.idTeamA,
+		idTeamB: controlPair.idTeamB,
+		evaluationCriteria: evaluationCriteriaToLabel(
+			controlPair.evaluationCriteria,
+		),
+		criteria0:
+			controlPair.evaluationCriteria === EvaluationCriteria.CRITERIA_0
+				? controlPair.criteria
+				: null,
+		criteria1:
+			controlPair.evaluationCriteria === EvaluationCriteria.CRITERIA_1
+				? controlPair.criteria
+				: null,
+	}));
+
+	return controlPairs;
+}
+
+export async function getEvaluationDataForTeams() {
+	const evaluationData = await prisma.evaluation.findMany({
+		where: {
+			assignedTeamId: {not: null},
+			assignedJuryId: null,
+		},
+	});
+	const evaluations = evaluationData.map((evaluation) => ({
+		...evaluation,
+		evaluationCriteria: evaluationCriteriaToLabel(
+			evaluation.evaluationCriteria,
+		),
+	}));
+
+	return evaluations;
+}
+
+export async function getEvaluationDataForJury() {
+	const evaluationData = await prisma.evaluation.findMany({
+		where: {
+			assignedTeamId: null,
+			assignedJuryId: {not: null},
+		},
+	});
+	const evaluations = evaluationData.map((evaluation) => ({
+		...evaluation,
+		evaluationCriteria: evaluationCriteriaToLabel(
+			evaluation.evaluationCriteria,
+		),
+	}));
+
+	return evaluations;
+}
+
+interface EvaluationData {
+	name: string;
+	idTeamA: number;
+	idTeamB: number;
+	assignedTeamId: number;
+	assignedTeamMemberId: number;
+	evaluationCriteria: 'realistic' | 'targeted';
+}
+
+interface EvaluationJuryData {
+	name: string;
+	idTeamA: number;
+	idTeamB: number;
+	assignedJuryId: number;
+	evaluationCriteria: 'realistic' | 'targeted';
+}
+
+export async function replenishBufferForTeam(team: {
+	id: number;
+	memberId: number;
+}) {
+	const [controlPairs, evaluationData] = await Promise.all([
+		getControlPairs(),
+		getEvaluationDataForTeams(),
+	]);
+
+	const evaluationsData = await axios
+		.post<{evaluations: EvaluationData[]}>(
+			`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
+			{
+				teamId: team.id,
+				teamMemberId: team.memberId,
+				controlPairs,
+				evaluationData,
+			},
+		)
+		.then((response) => response.data.evaluations);
+
+	const data = {
+		data: evaluationsData.map((evaluationData) => ({
+			name: evaluationData.name,
+			idTeamA: evaluationData.idTeamA,
+			idTeamB: evaluationData.idTeamB,
+			assignedTeamId: evaluationData.assignedTeamId,
+			assignedTeamMemberId: evaluationData.assignedTeamMemberId,
+			evaluationCriteria: labelToEvaluationCriteria(
+				evaluationData.evaluationCriteria,
+			),
+			version: 0,
+		})),
+	};
+
+	await prisma.evaluation.createMany(data);
+}
+
+export async function replenishBufferForJury(juryId: number) {
+	const [controlPairs, evaluationData] = await Promise.all([
+		getControlPairs(),
+		getEvaluationDataForJury(),
+	]);
+
+	const evaluationsData = await axios
+		.post<{evaluations: EvaluationJuryData[]}>(
+			`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
+			{
+				juryId,
+				controlPairs,
+				evaluationData,
+			},
+		)
+		.then((response) => response.data.evaluations);
+
+	const data = {
+		data: evaluationsData.map((evaluationData) => ({
+			name: evaluationData.name,
+			idTeamA: evaluationData.idTeamA,
+			assignedJuryId: evaluationData.assignedJuryId + 1,
+			idTeamB: evaluationData.idTeamB,
+			evaluationCriteria: labelToEvaluationCriteria(
+				evaluationData.evaluationCriteria,
+			),
+			version: 0,
+		})),
+	};
+
+	await prisma.evaluation.createMany(data);
 }
