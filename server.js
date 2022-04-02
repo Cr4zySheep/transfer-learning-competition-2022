@@ -33,6 +33,8 @@ app.prepare().then(() => {
 				readStream.pipe(response);
 				return;
 			}
+
+			await handle(request, response, parsedUrl);
 		} catch (error) {
 			console.error('Error occurred handling', request.url, error);
 			response.statusCode = 500;
