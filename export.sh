@@ -1,0 +1,1 @@
+docker save transfer-learning-competition-app:$VERSION migration-app:$VERSION tf-eval:$VERSION -o ../app_$VERSION.tar
