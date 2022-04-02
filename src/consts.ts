@@ -16,7 +16,7 @@ export const JURY_END_DATETIME = new Date('2022-04-10T23:59'); // April 10th 202
 // export const JURY_START_DATETIME = new Date('2021-04-07T00:01'); // April 7th 2022, 00:01
 // export const JURY_END_DATETIME = new Date('2022-04-10T23:59'); // April 10th 2022, 23:59
 
-export const NB_EVALUATIONS_PER_MEMBER = 235;
+export const NB_EVALUATIONS_PER_MEMBER = 400;
 
 export const VARIATION_TEXTS: Record<
 	string,
