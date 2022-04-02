@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import process from 'node:process';
-import {PrismaClient, TeamMember} from '@prisma/client';
+import {EvaluationCriteria, PrismaClient, TeamMember} from '@prisma/client';
 import nodemailer from 'nodemailer';
 import {MAIL_SENDER} from 'consts';
 
@@ -227,4 +227,18 @@ export async function generateResetPasswordTokenJury(): Promise<string> {
 	} while (isTaken);
 
 	return token;
+}
+
+export function evaluationCriteriaToLabel(criteria: EvaluationCriteria) {
+	if (criteria === EvaluationCriteria.CRITERIA_0) return 'realistic';
+	if (criteria === EvaluationCriteria.CRITERIA_1) return 'targeted';
+	return '';
+}
+
+export function labelToEvaluationCriteria(label: string) {
+	if (label === 'realistic') return EvaluationCriteria.CRITERIA_0;
+	if (label === 'targeted') return EvaluationCriteria.CRITERIA_1;
+
+	console.log('Unknown label:', label);
+	return EvaluationCriteria.CRITERIA_0;
 }

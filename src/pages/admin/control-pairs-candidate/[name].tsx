@@ -22,8 +22,8 @@ import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {
 	ControlPairCandidate,
-	EvaluationCriteria,
 	PrismaClient,
+	EvaluationCriteria,
 } from '@prisma/client';
 import Image from 'next/image';
 import {VARIATION_TEXTS} from 'consts';
@@ -33,6 +33,7 @@ import {
 	chooseControlPairCandidate,
 	fetchNextControlPairs,
 } from 'services/controlPairs';
+import CriteriaInformationDialog from 'components/CriteriaInformationDialog';
 
 interface VariationDescProps {
 	variation: string;
@@ -48,35 +49,6 @@ const VariationDesc: React.FunctionComponent<VariationDescProps> = ({
 	}, [variation]);
 
 	return <Typography>{variationText}</Typography>;
-};
-
-interface CriteriaInformationDialogProps extends DialogProps {
-	criteria: EvaluationCriteria;
-}
-
-const CriteriaInformationDialog: React.FunctionComponent<
-	CriteriaInformationDialogProps
-> = ({criteria, ...props}) => {
-	return (
-		<Dialog {...props} fullWidth maxWidth="sm">
-			<DialogTitle>Criteria: {criteria}</DialogTitle>
-
-			{/* <DialogContent>
-				<DialogContentText>TEXT TEXT</DialogContentText>
-			</DialogContent> */}
-
-			<DialogActions>
-				<Button
-					variant="contained"
-					onClick={() => {
-						props.onClose?.({}, 'backdropClick');
-					}}
-				>
-					Continue
-				</Button>
-			</DialogActions>
-		</Dialog>
-	);
 };
 
 const InstructionsDialog = (props: DialogProps) => {
@@ -132,7 +104,7 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 					console.error(error);
 				});
 		}
-	}, [fetchedControlPairCandidates]);
+	}, [fetchedControlPairCandidates, name]);
 
 	const currentEvaluation = fetchedControlPairCandidates[0];
 	const nextEvaluation = fetchedControlPairCandidates[1];
@@ -260,7 +232,11 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 									/>
 									<Typography paragraph>{currentEvaluation.name}</Typography>
 									<Typography paragraph>
-										{currentEvaluation.evaluationCriteria}
+										Criteria:{' '}
+										{currentEvaluation.evaluationCriteria ===
+										EvaluationCriteria.CRITERIA_0
+											? 'face realism'
+											: 'edition quality'}
 									</Typography>
 									<VariationDesc
 										variation={currentEvaluation.name.split('/')[1]}

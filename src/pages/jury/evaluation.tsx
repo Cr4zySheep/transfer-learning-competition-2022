@@ -26,6 +26,7 @@ import Image from 'next/image';
 import {JURY_END_DATETIME, JURY_START_DATETIME, VARIATION_TEXTS} from 'consts';
 import Head from 'next/head';
 import {getNbEvaluationsDone} from 'lib/jury';
+import CriteriaInformationDialog from 'components/CriteriaInformationDialog';
 
 interface VariationDescProps {
 	variation: string;
@@ -41,35 +42,6 @@ const VariationDesc: React.FunctionComponent<VariationDescProps> = ({
 	}, [variation]);
 
 	return <Typography>{variationText}</Typography>;
-};
-
-interface CriteriaInformationDialogProps extends DialogProps {
-	criteria: EvaluationCriteria;
-}
-
-const CriteriaInformationDialog: React.FunctionComponent<
-	CriteriaInformationDialogProps
-> = ({criteria, ...props}) => {
-	return (
-		<Dialog {...props} fullWidth maxWidth="sm">
-			<DialogTitle>Criteria: {criteria}</DialogTitle>
-
-			{/* <DialogContent>
-				<DialogContentText>TEXT TEXT</DialogContentText>
-			</DialogContent> */}
-
-			<DialogActions>
-				<Button
-					variant="contained"
-					onClick={() => {
-						props.onClose?.({}, 'backdropClick');
-					}}
-				>
-					Continue
-				</Button>
-			</DialogActions>
-		</Dialog>
-	);
 };
 
 const InstructionsDialog = (props: DialogProps) => {
@@ -242,7 +214,11 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 									/>
 									<Typography paragraph>{currentEvaluation.name}</Typography>
 									<Typography paragraph>
-										{currentEvaluation.evaluationCriteria}
+										Criteria:{' '}
+										{currentEvaluation.evaluationCriteria ===
+										EvaluationCriteria.CRITERIA_0
+											? 'face realism'
+											: 'edition quality'}
 									</Typography>
 									<VariationDesc
 										variation={currentEvaluation.name.split('/')[1]}
