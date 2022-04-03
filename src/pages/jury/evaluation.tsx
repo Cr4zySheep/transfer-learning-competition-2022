@@ -115,26 +115,26 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 		chooseEvaluation(currentEvaluation.id, choice)
 			.then((x) => {
 				setNbEvaluationsDone(x);
+
+				if (
+					currentEvaluation.evaluationCriteria !==
+					nextEvaluation?.evaluationCriteria
+				) {
+					setShowCriteriaDialog(true);
+				}
+
+				setFetchedEvaluations((previousFetchedEvaluations) =>
+					previousFetchedEvaluations.slice(1),
+				);
+
+				setDisabled(true);
+				timeoutRef.current = setTimeout(() => {
+					setDisabled(false);
+				}, 1000);
 			})
 			.catch((error) => {
 				console.error(error);
 			});
-
-		if (
-			currentEvaluation.evaluationCriteria !==
-			nextEvaluation?.evaluationCriteria
-		) {
-			setShowCriteriaDialog(true);
-		}
-
-		setFetchedEvaluations((previousFetchedEvaluations) =>
-			previousFetchedEvaluations.slice(1),
-		);
-
-		setDisabled(true);
-		timeoutRef.current = setTimeout(() => {
-			setDisabled(false);
-		}, 1000);
 	};
 
 	return (

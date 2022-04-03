@@ -1,9 +1,7 @@
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {NextApiRequest, NextApiResponse} from 'next';
-
-const prisma = new PrismaClient();
+import {prisma} from 'db';
 
 const nameToChoiceField: Record<string, 'nicolasChoice' | 'julesChoice'> = {
 	nicolas: 'nicolasChoice',

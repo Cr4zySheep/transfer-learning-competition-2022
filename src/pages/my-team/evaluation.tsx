@@ -145,31 +145,26 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 				setRemainingEvaluations(x);
 				if (x <= 0) {
 					setShowTaskFinishedDialog(true);
+				} else {
+					if (
+						currentEvaluation.evaluationCriteria !==
+						nextEvaluation?.evaluationCriteria
+					) {
+						setShowCriteriaDialog(true);
+					}
+
+					setFetchedEvaluations((previousFetchedEvaluations) =>
+						previousFetchedEvaluations.slice(1),
+					);
+
+					timeoutRef.current = setTimeout(() => {
+						setDisabled(false);
+					}, 1000);
 				}
 			})
 			.catch((error) => {
 				console.log(error);
 			});
-
-		// This isn't the last evaluations. This assumption can be false when another team member already finished everything.
-		if (nbRemainingEvaluations > 1) {
-			if (
-				currentEvaluation.evaluationCriteria !==
-				nextEvaluation?.evaluationCriteria
-			) {
-				setShowCriteriaDialog(true);
-			}
-
-			setFetchedEvaluations((previousFetchedEvaluations) =>
-				previousFetchedEvaluations.slice(1),
-			);
-
-			timeoutRef.current = setTimeout(() => {
-				setDisabled(false);
-			}, 1000);
-		} else {
-			setShowTaskFinishedDialog(true);
-		}
 	};
 
 	return (

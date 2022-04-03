@@ -1,10 +1,9 @@
-import {EvaluationStatus, Evaluation, PrismaClient} from '@prisma/client';
+import {EvaluationStatus, Evaluation} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {replenishBufferForJury, replenishBufferForTeam} from 'utils';
-
-const prisma = new PrismaClient();
+import {prisma} from 'db';
 
 const isScriptRunning: Record<number, boolean> = {};
 
