@@ -1,5 +1,5 @@
-import {PrismaClient} from '@prisma/client';
 import process from 'node:process';
+import {PrismaClient} from '@prisma/client';
 
 let _prisma: PrismaClient;
 
