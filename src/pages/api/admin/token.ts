@@ -1,10 +1,8 @@
-import {PrismaClient} from '@prisma/client';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {number, object} from 'yup';
 import validate from 'middlewares/validate';
 import {generateEmailValidationToken, sendValidationEmail} from 'utils';
-
-const prisma = new PrismaClient();
+import prisma from 'db';
 
 const schema = object({id: number().required()});
 

@@ -20,11 +20,7 @@ import {NextPage} from 'next';
 import Link from 'next/link';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
-import {
-	ControlPairCandidate,
-	PrismaClient,
-	EvaluationCriteria,
-} from '@prisma/client';
+import {ControlPairCandidate, EvaluationCriteria} from '@prisma/client';
 import Image from 'next/image';
 import {VARIATION_TEXTS} from 'consts';
 import Head from 'next/head';
@@ -34,6 +30,7 @@ import {
 	fetchNextControlPairs,
 } from 'services/controlPairs';
 import CriteriaInformationDialog from 'components/CriteriaInformationDialog';
+import prisma from 'db';
 
 interface VariationDescProps {
 	variation: string;
@@ -331,7 +328,6 @@ export const getServerSideProps = withIronSessionSsr(
 		}
 
 		try {
-			const prisma = new PrismaClient();
 			const initialNbControlPairs = await prisma.controlPair.count();
 
 			return {props: {initialNbControlPairs}};

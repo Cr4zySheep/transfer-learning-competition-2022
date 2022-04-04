@@ -1,8 +1,7 @@
-import {EvaluationStatus, PrismaClient} from '@prisma/client';
+import {EvaluationStatus} from '@prisma/client';
+import prisma from 'db';
 
 export async function getNbEvaluationsDone(juryId: number) {
-	const prisma = new PrismaClient();
-
 	const nbEvaluationsDone = await prisma.evaluation.count({
 		where: {
 			assignedJuryId: juryId,

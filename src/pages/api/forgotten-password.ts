@@ -1,4 +1,3 @@
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {ForgottenPasswordData, forgottenPasswordSchema} from 'schemas/auth';
@@ -11,8 +10,7 @@ import {
 	sendResetPasswordEmail,
 	sendResetPasswordInstructions,
 } from 'utils';
-
-const prisma = new PrismaClient();
+import prisma from 'db';
 
 const loginRoute = async (
 	request: NextApiRequest,

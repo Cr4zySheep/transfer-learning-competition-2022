@@ -2,9 +2,9 @@ import {EvaluationStatus, EvaluationCriteria} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {getNbEvaluationsDone} from 'lib/jury';
 import {sessionOptions} from 'lib/session';
-import {getNbRemainingEvaluations} from 'lib/team';
+import {getNbRemainingEvaluations} from 'lib/teamBack';
 import {NextApiRequest, NextApiResponse} from 'next';
-import {prisma} from 'db';
+import prisma from 'db';
 
 const evaluationMapping = {
 	[EvaluationCriteria.CRITERIA_0]: 'criteria0',

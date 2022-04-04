@@ -1,7 +1,7 @@
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {NextApiRequest, NextApiResponse} from 'next';
-import {prisma} from 'db';
+import prisma from 'db';
 
 const nameToChoiceField: Record<string, 'nicolasChoice' | 'julesChoice'> = {
 	nicolas: 'nicolasChoice',

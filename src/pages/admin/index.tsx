@@ -26,7 +26,7 @@ import {
 } from 'services/admin';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
-import {ControlPair, Jury, PrismaClient, TeamMember} from '@prisma/client';
+import {ControlPair, Jury, TeamMember} from '@prisma/client';
 import {
 	parseTeamWithMembersAndSubmissionToJson,
 	transformJsonToTeamWithMembersAndSubmissions,
@@ -36,6 +36,7 @@ import TeamMemberForm from 'components/templates/inscription/TeamMemberForm';
 import {teamMemberRegistration} from 'schemas/teamRegistration';
 import * as yup from 'yup';
 import Link from 'next/link';
+import prisma from 'db';
 
 const emptyMember = {
 	firstName: '',
@@ -456,8 +457,6 @@ export const getServerSideProps = withIronSessionSsr(async ({req}) => {
 		return {
 			redirect: {destination: '/admin/login', permanent: false},
 		};
-
-	const prisma = new PrismaClient();
 
 	const teams = await prisma.team
 		.findMany({

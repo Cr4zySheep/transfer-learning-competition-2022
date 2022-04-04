@@ -9,7 +9,7 @@ import {
 	getControlPairs,
 	labelToEvaluationCriteria,
 } from 'utils';
-import {prisma} from 'db';
+import prisma from 'db';
 
 interface ControlPairCandidateData {
 	name: string;

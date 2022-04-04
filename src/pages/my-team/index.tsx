@@ -18,7 +18,6 @@ import {
 	Snackbar,
 	Typography,
 } from '@mui/material';
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {Formik, Form} from 'formik';
@@ -28,6 +27,7 @@ import {
 	parseTeamWithMembersAndSubmissionToJson,
 	transformJsonToTeamWithMembersAndSubmissions,
 } from 'lib/team';
+import {getNbRemainingEvaluations} from 'lib/teamBack';
 import {NextPage} from 'next';
 import React, {useState} from 'react';
 import {TeamWithMembersAndSubmissionsJson} from 'types';
@@ -43,6 +43,7 @@ import {
 	PARTICIPANT_EVALUATION_START,
 	PARTICIPANT_SUBMISSION_DEADLINE,
 } from 'consts';
+import prisma from 'db';
 
 const LinearProgressWithLabel = (props: {value: number}) => {
 	return (
@@ -490,7 +491,6 @@ export const getServerSideProps = withIronSessionSsr(async ({req: request}) => {
 		};
 	}
 
-	const prisma = new PrismaClient();
 	try {
 		const teamWithMembers = await prisma.team.findUnique({
 			where: {id: team.id},

@@ -1,10 +1,10 @@
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {forgottenPasswordSchema} from 'schemas/auth';
 import validate from 'middlewares/validate';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {generateResetPasswordTokenJury} from 'utils';
+import prisma from 'db';
 
 const jurysData = [
 	{
@@ -23,8 +23,6 @@ const jurysData = [
 		email: 'francesca.bugiotti@centralesupelec.fr',
 	},
 ];
-
-const prisma = new PrismaClient();
 
 const loginRoute = async (
 	request: NextApiRequest,

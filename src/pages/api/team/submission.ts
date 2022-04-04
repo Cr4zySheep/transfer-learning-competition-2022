@@ -8,7 +8,7 @@ import busboy from 'busboy';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {sessionOptions} from 'lib/session';
 import {withIronSessionApiRoute} from 'iron-session/next';
-import {PrismaClient} from '@prisma/client';
+import prisma from 'db';
 
 export const config = {
 	api: {
@@ -69,7 +69,6 @@ async function postSubmission(
 
 			fstream.on('close', async () => {
 				console.log(timestamp(), filename, '- Saved successfully!');
-				const prisma = new PrismaClient();
 				const submission = await prisma.submission.create({
 					data: {
 						submittedAt: now,

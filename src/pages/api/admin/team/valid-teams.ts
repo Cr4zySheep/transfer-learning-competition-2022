@@ -1,15 +1,13 @@
 import fs from 'node:fs';
 import process from 'node:process';
 import path from 'node:path';
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import isAdmin from 'middlewares/isAdmin';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {parseTeamWithMembersAndSubmissionToJson} from 'lib/team';
 import axios from 'axios';
-
-const prisma = new PrismaClient();
+import prisma from 'db';
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {
 	switch (request.method) {

@@ -1,4 +1,4 @@
-import {Prisma, PrismaClient} from '@prisma/client';
+import {Prisma} from '@prisma/client';
 import {NextApiRequest, NextApiResponse} from 'next';
 import bcrypt from 'bcrypt';
 
@@ -8,8 +8,7 @@ import schema, {
 	TeamRegistration,
 } from 'schemas/teamRegistration';
 import {generateEmailValidationToken, sendValidationEmail} from 'utils';
-
-const prisma = new PrismaClient();
+import prisma from 'db';
 
 function isFirstYearStudent(member: TeamMemberRegistration) {
 	return member.isStudent === 'YES' && member.yearOfStudy === '1A';

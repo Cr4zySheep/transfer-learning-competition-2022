@@ -1,12 +1,10 @@
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {loginSchema, LoginData} from 'schemas/auth';
 import validate from 'middlewares/validate';
 import {NextApiRequest, NextApiResponse} from 'next';
 import bcrypt from 'bcrypt';
-
-const prisma = new PrismaClient();
+import prisma from 'db';
 
 const loginRoute = async (
 	request: NextApiRequest,

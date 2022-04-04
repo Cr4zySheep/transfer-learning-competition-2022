@@ -1,4 +1,3 @@
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {ResetPasswordData, resetPasswordSchema} from 'schemas/auth';
@@ -6,8 +5,7 @@ import validate from 'middlewares/validate';
 import {NextApiRequest, NextApiResponse} from 'next';
 import bcrypt from 'bcrypt';
 import {sendPasswordHasBeenChangedMail} from 'utils';
-
-const prisma = new PrismaClient();
+import prisma from 'db';
 
 const loginRoute = async (
 	request: NextApiRequest,

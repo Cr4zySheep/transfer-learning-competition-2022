@@ -1,6 +1,6 @@
 import {GetServerSideProps} from 'next';
-import {PrismaClient} from '@prisma/client';
 import {generateResetPasswordToken, sendResetPasswordEmail} from 'utils';
+import prisma from 'db';
 
 const VerifyToken = () => {
 	return null;
@@ -10,8 +10,6 @@ export default VerifyToken;
 
 export const getServerSideProps: GetServerSideProps = async ({params}) => {
 	let redirectURL: string;
-
-	const prisma = new PrismaClient();
 
 	const token = (params?.token as string) || '';
 

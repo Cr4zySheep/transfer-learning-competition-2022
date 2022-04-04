@@ -1,4 +1,3 @@
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {parseTeamWithMembersAndSubmissionToJson} from 'lib/team';
@@ -7,8 +6,7 @@ import validate from 'middlewares/validate';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {teamMemberRegistration} from 'schemas/teamRegistration';
 import * as yup from 'yup';
-
-const prisma = new PrismaClient();
+import prisma from 'db';
 
 const schema = yup
 	.object({teamId: yup.number().required()})

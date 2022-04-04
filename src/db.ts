@@ -1,8 +1,20 @@
-import process from 'node:process';
 import {PrismaClient} from '@prisma/client';
+import process from 'node:process';
 
-// @ts-expect-error Only for development
-export const prisma = (global.prisma ?? new PrismaClient()) as PrismaClient;
+let _prisma: PrismaClient;
 
-// @ts-expect-error Only for development
-if (process.env.NODE_ENV !== 'production') global.prisma = prisma;
+if (process.env.NODE_ENV === 'production') {
+	_prisma = new PrismaClient();
+} else {
+	// @ts-expect-error Hello world
+	if (!global.prisma) {
+		// @ts-expect-error Hello world
+		global.prisma = new PrismaClient();
+	}
+
+	// @ts-expect-error Hello world
+	_prisma = global.prisma as PrismaClient;
+}
+
+const prisma = _prisma;
+export default prisma;

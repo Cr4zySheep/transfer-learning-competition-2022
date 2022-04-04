@@ -4,7 +4,7 @@ import {EvaluationCriteria, TeamMember} from '@prisma/client';
 import nodemailer from 'nodemailer';
 import {MAIL_SENDER} from 'consts';
 import axios from 'axios';
-import {prisma} from './db';
+import prisma from './db';
 
 export function getMailTransport() {
 	return nodemailer.createTransport({
@@ -292,6 +292,7 @@ export async function getEvaluationDataForJury() {
 	});
 	const evaluations = evaluationData.map((evaluation) => ({
 		...evaluation,
+		assignedJuryId: (evaluation.assignedJuryId ?? 1) - 1,
 		evaluationCriteria: evaluationCriteriaToLabel(
 			evaluation.evaluationCriteria,
 		),
@@ -365,7 +366,7 @@ export async function replenishBufferForJury(juryId: number) {
 		.post<{evaluations: EvaluationJuryData[]}>(
 			`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
 			{
-				juryId,
+				juryId: juryId - 1,
 				controlPairs,
 				evaluationData,
 			},

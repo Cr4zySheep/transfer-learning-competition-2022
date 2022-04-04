@@ -1,11 +1,9 @@
 import fs from 'node:fs';
-import {PrismaClient} from '@prisma/client';
 import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import isAdmin from 'middlewares/isAdmin';
 import {NextApiRequest, NextApiResponse} from 'next';
-
-const prisma = new PrismaClient();
+import prisma from 'db';
 
 async function handler(request: NextApiRequest, response: NextApiResponse) {
 	const id = Number(request.query.id as string);

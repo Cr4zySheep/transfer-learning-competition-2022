@@ -3,7 +3,7 @@ import {withIronSessionApiRoute} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {replenishBufferForJury, replenishBufferForTeam} from 'utils';
-import {prisma} from 'db';
+import prisma from 'db';
 
 const isScriptRunning: Record<number, boolean> = {};
 
