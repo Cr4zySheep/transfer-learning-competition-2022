@@ -4,6 +4,7 @@ import {
 	Button,
 	CircularProgress,
 	Container,
+	Link as MuiLink,
 	Dialog,
 	DialogActions,
 	DialogContent,
@@ -23,7 +24,7 @@ import {
 } from 'services/evaluations';
 import {Evaluation, EvaluationCriteria} from '@prisma/client';
 import Image from 'next/image';
-import {getNbRemainingEvaluations} from 'lib/team';
+import {getNbRemainingEvaluations} from 'lib/teamBack';
 import {PARTICIPANT_EVALUATION_END, VARIATION_TEXTS} from 'consts';
 import Head from 'next/head';
 import {useRouter} from 'next/router';
@@ -50,7 +51,15 @@ const InstructionsDialog = (props: DialogProps) => {
 		<Dialog {...props} fullWidth maxWidth="sm">
 			<DialogTitle>How to evaluate a sample?</DialogTitle>
 			<DialogContent>
-				<DialogContentText>TEXT TEXT</DialogContentText>
+				<DialogContentText>
+					You are about to start evaluating. If you have not yet read our
+					evaluation guide, please do this first !<br />
+					<br />
+					Link :{' '}
+					<MuiLink href="https://transfer-learning.org/evaluation_tutorial">
+						https://transfer-learning.org/evaluation_tutorial
+					</MuiLink>
+				</DialogContentText>
 			</DialogContent>
 			<DialogActions>
 				<Button

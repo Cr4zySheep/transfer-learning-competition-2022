@@ -23,7 +23,6 @@ import {sessionOptions} from 'lib/session';
 import {Formik, Form} from 'formik';
 import Link from 'next/link';
 import {
-	getNbRemainingEvaluations,
 	parseTeamWithMembersAndSubmissionToJson,
 	transformJsonToTeamWithMembersAndSubmissions,
 } from 'lib/team';
@@ -387,8 +386,10 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 								Before your submission is accepted, you need to help us with the
 								evaluation procedure.
 								<br />
-								First of all, please watch the following explanatory video :{' '}
-								<strong>LINK</strong>
+								Please read the following instructions document :{' '}
+								<MUILink href="https://transfer-learning.org/evaluation_tutorial">
+									https://transfer-learning.org/evaluation_tutorial
+								</MUILink>
 								<br />
 								Then, click the button below to start evaluating !
 							</Typography>

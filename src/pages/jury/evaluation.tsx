@@ -5,6 +5,7 @@ import {
 	CircularProgress,
 	Container,
 	Dialog,
+	Link as MuiLink,
 	DialogActions,
 	DialogContent,
 	DialogContentText,
@@ -50,7 +51,15 @@ const InstructionsDialog = (props: DialogProps) => {
 			<DialogTitle>How to evaluate a sample?</DialogTitle>
 
 			<DialogContent>
-				<DialogContentText>TEXT TEXT</DialogContentText>
+				<DialogContentText>
+					You are about to start evaluating. If you have not yet read our
+					evaluation guide, please do this first !<br />
+					<br />
+					Link :{' '}
+					<MuiLink href="https://transfer-learning.org/evaluation_tutorial">
+						https://transfer-learning.org/evaluation_tutorial
+					</MuiLink>
+				</DialogContentText>{' '}
 			</DialogContent>
 
 			<DialogActions>

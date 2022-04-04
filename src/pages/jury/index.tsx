@@ -1,5 +1,11 @@
 import React from 'react';
-import {Button, Container, Grid, Typography} from '@mui/material';
+import {
+	Button,
+	Container,
+	Grid,
+	Typography,
+	Link as MuiLink,
+} from '@mui/material';
 import {JURY_END_DATETIME, JURY_START_DATETIME} from 'consts';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
@@ -38,8 +44,10 @@ const JuryHomePage: NextPage<JuryHomePageProps> = ({
 				Thank you for helping us review the top 3 of this competition&apos;s two
 				leaderboards.
 				<br />
-				First of all, please watch the following explanatory video :{' '}
-				<strong>LINK</strong>
+				Please read the following instructions document :{' '}
+				<MuiLink href="https://transfer-learning.org/evaluation_tutorial">
+					https://transfer-learning.org/evaluation_tutorial
+				</MuiLink>{' '}
 				<br />
 				Then, click the button below to start evaluating !
 			</Typography>
