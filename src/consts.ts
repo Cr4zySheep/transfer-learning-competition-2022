@@ -3,11 +3,11 @@ export const MAIL_SENDER =
 	'Ceteris Paribus Competition <ceterisparibus-competition@transfer-learning.org>';
 
 // Prod dates
-export const PARTICIPANT_SUBMISSION_DEADLINE = new Date('2022-04-05T21:59'); // April 5th 2022, 23:59
-export const PARTICIPANT_EVALUATION_START = new Date('2022-04-06T06:00'); // April 6th 2022, 8:00
-export const PARTICIPANT_EVALUATION_END = new Date('2022-04-06T21:59'); // April 6th 2022, 23:59
-export const JURY_START_DATETIME = new Date('2022-04-06T22:01'); // April 7th 2022, 00:01
-export const JURY_END_DATETIME = new Date('2022-04-10T21:59'); // April 10th 2022, 23:59
+export const PARTICIPANT_SUBMISSION_DEADLINE = new Date('2022-04-06T21:59'); // April 6th 2022, 23:59
+export const PARTICIPANT_EVALUATION_START = new Date('2022-04-07T08:00'); // April 7th 2022, 8:00
+export const PARTICIPANT_EVALUATION_END = new Date('2022-04-07T21:59'); // April 7th 2022, 23:59
+export const JURY_START_DATETIME = new Date('2022-04-07T22:01'); // April 8th 2022, 00:01
+export const JURY_END_DATETIME = new Date('2023-04-13T21:59'); // April 13th 2022, 23:59
 
 // Dev dates
 // export const PARTICIPANT_SUBMISSION_DEADLINE = new Date('2023-04-05T23:59');
@@ -16,7 +16,7 @@ export const JURY_END_DATETIME = new Date('2022-04-10T21:59'); // April 10th 202
 // export const JURY_START_DATETIME = new Date('2021-04-07T00:01'); // April 7th 2022, 00:01
 // export const JURY_END_DATETIME = new Date('2022-04-10T23:59'); // April 10th 2022, 23:59
 
-export const NB_EVALUATIONS_PER_MEMBER = 400;
+export const NB_EVALUATIONS_PER_MEMBER = 0;
 
 export const VARIATION_TEXTS: Record<
 	string,
