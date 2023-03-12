@@ -296,7 +296,7 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 													<b>In particular</b>, you have verified that all the
 													members of your team have read and accepted the{' '}
 													<MUILink
-														href="https://transfer-learning.org/cession"
+														href="https://drive.google.com/file/d/156CQYvpz6ARe1ic6gLT-eG7m5tqvyXAD/view?usp=share_link"
 														target="__blank"
 													>
 														cession of rights related to your submission

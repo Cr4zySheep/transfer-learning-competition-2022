@@ -217,10 +217,10 @@ const TeamRegistrationForm = () => {
 									other necessary information will be available after March 8th
 									at this address:{' '}
 									<Link
-										href="https://transfer-learning.org/info"
+										href="https://transfer-learning.org/competition"
 										target="__blank"
 									>
-										https://transfer-learning.org/info
+										https://transfer-learning.org/competition
 									</Link>
 									.
 								</>
