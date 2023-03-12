@@ -3,7 +3,8 @@ export const MAIL_SENDER =
 	'Ceteris Paribus Competition <ceterisparibus-competition@transfer-learning.org>';
 
 // Prod dates
-export const PARTICIPANT_SUBMISSION_DEADLINE = new Date('2022-04-06T21:59'); // April 6th 2022, 23:59
+export const REGISTRATION_DEADLINE = new Date('2024-01-01T02:02');
+export const PARTICIPANT_SUBMISSION_DEADLINE = new Date('2024-04-06T21:59'); // April 6th 2022, 23:59
 export const PARTICIPANT_EVALUATION_START = new Date('2022-04-07T08:00'); // April 7th 2022, 8:00
 export const PARTICIPANT_EVALUATION_END = new Date('2022-04-07T21:59'); // April 7th 2022, 23:59
 export const JURY_START_DATETIME = new Date('2022-04-07T22:01'); // April 8th 2022, 00:01

@@ -9,12 +9,20 @@ import schema, {
 } from 'schemas/teamRegistration';
 import {generateEmailValidationToken, sendValidationEmail} from 'utils';
 import prisma from 'db';
+import {REGISTRATION_DEADLINE} from 'consts';
 
 function isFirstYearStudent(member: TeamMemberRegistration) {
 	return member.isStudent === 'YES' && member.yearOfStudy === '1A';
 }
 
 async function register(data: TeamRegistration, response: NextApiResponse) {
+	const now = new Date();
+
+	if (now > REGISTRATION_DEADLINE) {
+		response.status(400).send('Registrations are closed.');
+		return;
+	}
+
 	if (!data || !data.members) {
 		response.status(400).send('');
 		return;
@@ -60,7 +68,11 @@ async function register(data: TeamRegistration, response: NextApiResponse) {
 	} catch (error: unknown) {
 		if (error instanceof Prisma.PrismaClientKnownRequestError) {
 			// TODO: Better managment of Prisma error, using yup.ValidationError for example
-			response.status(400).end(error.message);
+			response
+				.status(400)
+				.end(
+					'At least one of these email addresses is already used by another team.',
+				);
 		} else {
 			throw error;
 		}

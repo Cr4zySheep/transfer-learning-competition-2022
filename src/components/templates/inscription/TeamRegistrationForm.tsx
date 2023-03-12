@@ -100,10 +100,7 @@ const TeamRegistrationForm = () => {
 						if (typeof errorData === 'object') {
 							setErrors(yupToFormErrors(error.response.data));
 						} else if (typeof errorData === 'string') {
-							// SetStatus(errorData);
-							setStatus(
-								'At least one of these email addresses is already used by another team.',
-							);
+							setStatus(errorData);
 						} else
 							console.error('An error occured with unknown type :', errorData);
 					}
