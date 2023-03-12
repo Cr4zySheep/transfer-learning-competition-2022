@@ -179,7 +179,7 @@ const EvaluationPage: NextPage<EvaluationPageProps> = ({
 	return (
 		<>
 			<Head>
-				<title>Ceteris Paribus Face Challenge - Evaluating some samples</title>
+				<title>Leaf Nothing Behind Challenge - Evaluating some samples</title>
 			</Head>
 
 			<InstructionsDialog

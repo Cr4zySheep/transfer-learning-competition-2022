@@ -2,8 +2,9 @@ import crypto from 'node:crypto';
 import process from 'node:process';
 import {EvaluationCriteria, TeamMember} from '@prisma/client';
 import nodemailer from 'nodemailer';
-import {MAIL_SENDER} from 'consts';
+import {MAIL_SENDER, PARTICIPANT_SUBMISSION_DEADLINE} from 'consts';
 import axios from 'axios';
+import {toParisDateTime} from 'lib/utils.shared';
 import prisma from './db';
 
 export function getMailTransport() {
@@ -27,17 +28,19 @@ export async function sendValidationEmail(
 
 	const text = `Dear ${firstName},
 
-Thank you for registering as a member of a team in Transfer Learning's Ceteris Paribus Face Challenge.
+Thank you for registering as a member of a team in Transfer Learning's Leaf Nothing Behind Challenge.
 
-A few IMPORTANT THINGS for you to know :
+A few IMPORTANT THINGS for you to know:
 
-	- We need to be sure that you will receive the necessary information during the course of the competition. Please click this link to verify your email address : http://${
+	- We need to be sure that you will receive the necessary information during the course of the competition. Please click this link to verify your email address: http://${
 		process.env.HOSTNAME ?? ''
 	}/token/${token}
 
-	- You can log in to your team account from this page using your email and your team password : https://competition.transfer-learning.org/login
+	- You can log in to your team account from this page using your email and your team password: https://competition.transfer-learning.org/login
 
-Good luck competing ! You have until April 5th to send us your submissions !
+Good luck competing! You have until ${toParisDateTime(
+		PARTICIPANT_SUBMISSION_DEADLINE,
+	)} to send us your submissions!
 
 Best regards,
 The organizing team`;
@@ -45,11 +48,11 @@ The organizing team`;
 	const info = await transporter.sendMail({
 		from: MAIL_SENDER, // Sender address
 		to: email,
-		subject: 'Ceteris Paribus - Verify your email !',
+		subject: 'Leaf Nothing Behind - Verify your email!',
 		text,
 	});
 
-	console.debug(`Verify mail : Mail ${info.messageId} sent to ${email}`);
+	console.debug(`Verify mail: Mail ${info.messageId} sent to ${email}`);
 }
 
 export async function sendResetPasswordEmail(user: TeamMember, token: string) {
@@ -66,12 +69,12 @@ The organizing team`;
 	const info = await transporter.sendMail({
 		from: MAIL_SENDER,
 		to: user.email,
-		subject: "Ceteris Paribus - Reset your team's password",
+		subject: "Leaf Nothing Behind - Reset your team's password",
 		text,
 	});
 
 	console.debug(
-		`Reset your password : Mail ${info.messageId} sent to ${user.email}`,
+		`Reset your password: Mail ${info.messageId} sent to ${user.email}`,
 	);
 }
 
@@ -84,12 +87,12 @@ export async function sendPasswordHasBeenChangedMail(members: TeamMember[]) {
 	const info = await transporter.sendMail({
 		from: MAIL_SENDER,
 		to: emails,
-		subject: 'Ceteris Paribus - Password changed',
+		subject: 'Leaf Nothing Behind - Password changed',
 		text,
 	});
 
 	console.debug(
-		`Password changed : Mail ${info.messageId} sent to ${emails.join(', ')}`,
+		`Password changed: Mail ${info.messageId} sent to ${emails.join(', ')}`,
 	);
 }
 
@@ -118,12 +121,12 @@ The organizing team`;
 	const info = await transporter.sendMail({
 		from: MAIL_SENDER,
 		to: emails,
-		subject: `Ceteris Paribus - Authorize ${author.firstName} ${author.lastName} to reset the password of your team`,
+		subject: `Leaf Nothing Behind - Authorize ${author.firstName} ${author.lastName} to reset the password of your team`,
 		text,
 	});
 
 	console.debug(
-		`Reset password consent : Mail ${info.messageId} sent to ${emails.join(
+		`Reset password consent: Mail ${info.messageId} sent to ${emails.join(
 			', ',
 		)}`,
 	);
@@ -144,12 +147,12 @@ The organizing team`;
 		from: MAIL_SENDER,
 		to: author.email,
 		subject:
-			'Ceteris Paribus - Next step for changing the password of your team',
+			'Leaf Nothing Behind - Next step for changing the password of your team',
 		text,
 	});
 
 	console.debug(
-		`Reset password instructions : Mail ${info.messageId} sent to ${author.email}`,
+		`Reset password instructions: Mail ${info.messageId} sent to ${author.email}`,
 	);
 }
 

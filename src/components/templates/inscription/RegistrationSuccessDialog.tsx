@@ -24,7 +24,7 @@ const RegistrationSuccessDialog = ({open}: RegistrationSuccessDialogProps) => {
 					email.
 				</DialogContentText>
 				<DialogContentText paragraph>
-					Also check your SPAM folder !
+					Also check your SPAM folder!
 				</DialogContentText>
 				<DialogContentText>
 					You can now read more carefully the information about the competition
@@ -37,7 +37,7 @@ const RegistrationSuccessDialog = ({open}: RegistrationSuccessDialogProps) => {
 					fullWidth
 					variant="contained"
 					component={Link}
-					href="https://transfer-learning.org/info"
+					href="https://transfer-learning.org/competition"
 				>
 					See more information
 				</Button>

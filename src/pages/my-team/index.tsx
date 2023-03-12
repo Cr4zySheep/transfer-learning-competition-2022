@@ -12,8 +12,6 @@ import {
 	Grid,
 	LinearProgress,
 	Link as MUILink,
-	List,
-	ListItem,
 	Paper,
 	Snackbar,
 	Typography,
@@ -43,6 +41,7 @@ import {
 	PARTICIPANT_SUBMISSION_DEADLINE,
 } from 'consts';
 import prisma from 'db';
+import {toParisDateTime} from 'lib/utils.shared';
 
 const LinearProgressWithLabel = (props: {value: number}) => {
 	return (
@@ -280,7 +279,7 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 													You have verified that all the members of your team
 													have read and accepted the{' '}
 													<MUILink
-														href="https://transfer-learning.org/rules"
+														href="https://drive.google.com/drive/folders/1IovQAHaMIa1frAKua3UiAFQndEvtqjM1?usp=share_link"
 														target="__blank"
 													>
 														rules of the competition
@@ -311,7 +310,7 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 												<>
 													You are aware of our{' '}
 													<MUILink
-														href="https://transfer-learning.org/submissionguide"
+														href="https://drive.google.com/drive/folders/1Z5OydVq2GWkFSbqAUbm5mYAem1wU2DJL?usp=share_link"
 														target="__blank"
 													>
 														submission guide
@@ -411,13 +410,11 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 			<Typography variant="h4" sx={{marginTop: 2}}>
 				Submissions history
 			</Typography>
-			<List>
+			<ol>
 				{team.submissions.map((submission) => (
-					<ListItem key={submission.id}>
-						{submission.submittedAt.toLocaleString()}
-					</ListItem>
+					<li key={submission.id}>{toParisDateTime(submission.submittedAt)}</li>
 				))}
-			</List>
+			</ol>
 			<Snackbar
 				open={showSnackbar}
 				onClose={() => {
@@ -431,50 +428,62 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 				Information
 			</Typography>
 			<Typography paragraph>
-				Having an issue ? A question ? Send us an email in English or in French
-				:{' '}
+				Having an issue? A question? Send us an email in English or in French at{' '}
 				<MUILink href="mailto:transferlearning.event@gmail.com">
 					transferlearning.event@gmail.com
 				</MUILink>
+				.
 			</Typography>
 
 			<Typography paragraph>
-				<Typography color="error" component="span">
-					Submission deadline :
+				<Typography color="error" component="span" fontWeight="bold">
+					Submission deadline:
 				</Typography>{' '}
-				Midnight (Paris time) in the night between APRIL 5th and APRIL 6th
+				{toParisDateTime(PARTICIPANT_SUBMISSION_DEADLINE)}
 			</Typography>
 
-			<Typography paragraph>
-				<MUILink href="https://transfer-learning.org/rules" target="__blank">
-					Competition rules
-				</MUILink>
-			</Typography>
+			<b>Documents</b>
+			<ul style={{marginTop: '.2em'}}>
+				<li>
+					When the competition starts, any and all documents such as the
+					competition rules, legal elements, data explanations, etc. will be
+					made accessible in this{' '}
+					<MUILink
+						href="https://drive.google.com/drive/folders/1u31bpBWvbvrKgCgbavGWp_mNOzZb3zQ4?usp=share_link"
+						target="__blank"
+					>
+						Google Drive folder
+					</MUILink>
+					.
+				</li>
+
+				<li>
+					<MUILink
+						href="https://drive.google.com/drive/folders/1IovQAHaMIa1frAKua3UiAFQndEvtqjM1?usp=share_link"
+						target="__blank"
+					>
+						Competition rules
+					</MUILink>
+				</li>
+
+				<li>
+					<MUILink
+						href="https://drive.google.com/drive/folders/1Z5OydVq2GWkFSbqAUbm5mYAem1wU2DJL?usp=share_link"
+						target="__blank"
+					>
+						Guide to send a submission
+					</MUILink>
+				</li>
+			</ul>
 
 			<Typography paragraph>
-				Download the dataset : click{' '}
+				All this information will also be made available on this website :{' '}
 				<MUILink
-					href="https://drive.google.com/drive/folders/1-R1863MV8CuCjmycsLy05Uc6bdkWfuOP?usp=sharing"
+					href="https://transfer-learning.org/competition"
 					target="__blank"
 				>
-					this
+					https://transfer-learning.org/competition
 				</MUILink>
-				, then right click CeterisParibusDataset.zip and select
-				&quot;Download&quot;.
-			</Typography>
-
-			<Typography paragraph>
-				<MUILink
-					href="https://transfer-learning.org/submissionguide"
-					target="__blank"
-				>
-					Guide to send a submission
-				</MUILink>
-			</Typography>
-
-			<Typography paragraph>
-				More information may be displayed here in the future, keep an eye open
-				;)
 			</Typography>
 		</Container>
 	);

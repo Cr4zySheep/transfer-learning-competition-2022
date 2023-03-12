@@ -17,6 +17,8 @@ import {register} from 'services/team';
 import TextField from 'components/TextField';
 import CheckboxField from 'components/Checkbox';
 import {bool, object} from 'yup';
+import {COMPETITION_START, PARTICIPANT_SUBMISSION_DEADLINE} from 'consts';
+import {toParisDateTime} from 'lib/utils.shared';
 import TeamMemberForm from './TeamMemberForm';
 import RegistrationSuccessDialog from './RegistrationSuccessDialog';
 
@@ -201,7 +203,8 @@ const TeamRegistrationForm = () => {
 							label={
 								<>
 									The team is aware that the final submission deadline for the
-									competition is April 5th 23:59 (Paris time).
+									competition is{' '}
+									<b>{toParisDateTime(PARTICIPANT_SUBMISSION_DEADLINE)}</b>.
 								</>
 							}
 						/>
@@ -211,8 +214,8 @@ const TeamRegistrationForm = () => {
 							label={
 								<>
 									The whole team is aware that the rules of the competition and
-									other necessary information will be available after March 8th
-									at this address:{' '}
+									other necessary information will be available after{' '}
+									<b>{toParisDateTime(COMPETITION_START)}</b> at this address:{' '}
 									<Link
 										href="https://transfer-learning.org/competition"
 										target="__blank"
