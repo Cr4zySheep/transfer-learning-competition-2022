@@ -24,7 +24,6 @@ import {
 	parseTeamWithMembersAndSubmissionToJson,
 	transformJsonToTeamWithMembersAndSubmissions,
 } from 'lib/team';
-import {getNbRemainingEvaluations} from 'lib/teamBack';
 import {NextPage} from 'next';
 import React, {useState} from 'react';
 import {TeamWithMembersAndSubmissionsJson} from 'types';
@@ -34,12 +33,7 @@ import FileUploadField from 'components/FileUploadField';
 import {postSubmission} from 'services/team';
 import * as yup from 'yup';
 import CheckboxField from 'components/Checkbox';
-import {
-	NB_MAX_SUBMISSIONS,
-	PARTICIPANT_EVALUATION_END,
-	PARTICIPANT_EVALUATION_START,
-	PARTICIPANT_SUBMISSION_DEADLINE,
-} from 'consts';
+import {NB_MAX_SUBMISSIONS, PARTICIPANT_SUBMISSION_DEADLINE} from 'consts';
 import prisma from 'db';
 import {toParisDateTime} from 'lib/utils.shared';
 
@@ -61,8 +55,6 @@ const LinearProgressWithLabel = (props: {value: number}) => {
 interface MyTeamPageProps {
 	team: TeamWithMembersAndSubmissionsJson;
 	canSubmit: boolean;
-	canEvaluate: boolean;
-	initialNbOfEvaluations: number;
 }
 
 interface PostSubmissionData {
@@ -115,12 +107,7 @@ const PostSubmissionConfirmationDialog: React.FC<
 	</Dialog>
 );
 
-const MyTeamPage: NextPage<MyTeamPageProps> = ({
-	canSubmit,
-	canEvaluate,
-	initialNbOfEvaluations,
-	...props
-}) => {
+const MyTeamPage: NextPage<MyTeamPageProps> = ({canSubmit, ...props}) => {
 	const [team, setTeam] = useState(
 		transformJsonToTeamWithMembersAndSubmissions(props.team),
 	);
@@ -129,8 +116,6 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 	const [showPopup, setShowPopup] = useState(false);
 	const [showProgressDialog, setShowProgressDialog] = useState(false);
 	const [showSnackbar, setShowSnackbar] = useState(false);
-
-	const nbRemainingEvaluations = initialNbOfEvaluations;
 
 	return (
 		<Container>
@@ -374,39 +359,6 @@ const MyTeamPage: NextPage<MyTeamPageProps> = ({
 				</>
 			)}
 
-			{canEvaluate && (
-				<>
-					<Typography gutterBottom variant="h4">
-						Evaluation
-					</Typography>
-					{nbRemainingEvaluations > 0 ? (
-						<>
-							<Typography paragraph>
-								Before your submission is accepted, you need to help us with the
-								evaluation procedure.
-								<br />
-								Please read the following instructions document :{' '}
-								<MUILink href="https://transfer-learning.org/evaluation_tutorial">
-									https://transfer-learning.org/evaluation_tutorial
-								</MUILink>
-								<br />
-								Then, click the button below to start evaluating !
-							</Typography>
-							<Typography paragraph>
-								Remaining evaluations: {nbRemainingEvaluations}
-							</Typography>
-							<Link passHref href="/my-team/evaluation">
-								<Button variant="outlined">Evaluate some samples</Button>
-							</Link>
-						</>
-					) : (
-						<Typography paragraph>
-							Your team has evaluated enough samples in order to qualify.
-						</Typography>
-					)}
-				</>
-			)}
-
 			<Typography variant="h4" sx={{marginTop: 2}}>
 				Submissions history
 			</Typography>
@@ -514,10 +466,6 @@ export const getServerSideProps = withIronSessionSsr(async ({req: request}) => {
 			props: {
 				team: parseTeamWithMembersAndSubmissionToJson(teamWithMembers),
 				canSubmit: now < PARTICIPANT_SUBMISSION_DEADLINE,
-				canEvaluate:
-					PARTICIPANT_EVALUATION_START <= now &&
-					now <= PARTICIPANT_EVALUATION_END,
-				initialNbOfEvaluations: await getNbRemainingEvaluations(team.id),
 			},
 		};
 	} catch {

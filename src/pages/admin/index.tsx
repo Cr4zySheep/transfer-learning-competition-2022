@@ -19,14 +19,11 @@ import {
 	addNewTeamMember,
 	deleteTeam,
 	generateNewEmailValidationToken,
-	syncTop3,
-	syncTop1,
-	syncValidSubmission,
 	updateTeamMember,
 } from 'services/admin';
 import {withIronSessionSsr} from 'iron-session/next';
 import {sessionOptions} from 'lib/session';
-import {ControlPair, Jury, TeamMember} from '@prisma/client';
+import {TeamMember} from '@prisma/client';
 import {
 	parseTeamWithMembersAndSubmissionToJson,
 	transformJsonToTeamWithMembersAndSubmissions,
@@ -35,7 +32,6 @@ import {Form, Formik} from 'formik';
 import TeamMemberForm from 'components/templates/inscription/TeamMemberForm';
 import {teamMemberRegistration} from 'schemas/teamRegistration';
 import * as yup from 'yup';
-import Link from 'next/link';
 import prisma from 'db';
 
 const emptyMember = {
@@ -51,8 +47,6 @@ const emptyMember = {
 
 interface AdminPageProps {
 	teams: TeamWithMembersAndSubmissionsJson[];
-	jurys: Jury[];
-	controlPairs: ControlPair[];
 }
 
 interface ButtonWithConfirmationProps extends ButtonProps {
@@ -104,11 +98,7 @@ const ButtonWithConfirmation: React.FunctionComponent<
 	);
 };
 
-const AdminPage: NextPage<AdminPageProps> = ({
-	jurys,
-	controlPairs,
-	...props
-}) => {
+const AdminPage: NextPage<AdminPageProps> = (props) => {
 	const [teams, setTeams] = useState<
 		Array<Omit<TeamWithMembersAndSubmissions, 'password'>>
 	>(
@@ -136,80 +126,9 @@ const AdminPage: NextPage<AdminPageProps> = ({
 	return (
 		<Container>
 			<Typography gutterBottom variant="h4">
-				Paires de contrôle
-			</Typography>
-			<Grid container spacing={2}>
-				<Grid item>
-					<Link passHref href="/admin/control-pairs-candidate/nicolas">
-						<Button variant="contained">Lien pour Nicolas</Button>
-					</Link>
-				</Grid>
-				<Grid item>
-					<Link passHref href="/admin/control-pairs-candidate/jules">
-						<Button variant="contained">Lien pour Jules</Button>
-					</Link>
-				</Grid>
-			</Grid>
-			<ul>
-				{controlPairs.map(
-					({id, name, idTeamA, idTeamB, evaluationCriteria, criteria}) => (
-						<li key={id}>
-							<a href={`/media/team-${idTeamA}/${name}.png`}>Image gauche</a>,{' '}
-							<a href={`/media/team-${idTeamB}/${name}.png`}>Image droite</a>,{' '}
-							{evaluationCriteria}, {criteria ? 'Droite' : 'Gauche'}
-						</li>
-					),
-				)}
-			</ul>
-			<Typography variant="h4" sx={{marginTop: 2}}>
-				Liste des jurys
-			</Typography>
-			<ul>
-				{jurys.map((jury) => (
-					<li key={jury.id}>
-						{jury.firstName} {jury.lastName} ({jury.email})
-						{jury.resetPasswordToken && (
-							<>
-								<br />
-								https://transfer-learning/jury/reset-password/
-								{jury.resetPasswordToken}
-							</>
-						)}
-					</li>
-				))}
-			</ul>
-			<Typography gutterBottom variant="h4">
 				Liste des équipes
 			</Typography>
-			<Button
-				variant="outlined"
-				onClick={async () =>
-					syncValidSubmission().then((data) => {
-						setTeams(
-							data.map((x) => transformJsonToTeamWithMembersAndSubmissions(x)),
-						);
-					})
-				}
-			>
-				Sync team with valid submission
-			</Button>
-			<br /> <br />
-			<Button
-				variant="outlined"
-				onClick={async () =>
-					syncTop3().then((data) => {
-						setTeams(
-							data.map((x) => transformJsonToTeamWithMembersAndSubmissions(x)),
-						);
-					})
-				}
-			>
-				Sync top 3
-			</Button>
-			<br /> <br />
-			<Button variant="outlined" onClick={async () => syncTop1()}>
-				Sync top 1
-			</Button>
+
 			<Dialog
 				fullWidth
 				open={Boolean(teamMember)}
@@ -355,13 +274,8 @@ const AdminPage: NextPage<AdminPageProps> = ({
 			<ul>
 				{teams.map((team) => (
 					<li key={team.id}>
-						Team #{team.id} {team.firstYearOnly && ' - First year only'}{' '}
-						{team.isTop3 && 'Top 3'}
-						<br />
+						Team #{team.id} {team.firstYearOnly && ' - First year only'} <br />
 						{team.submissions.length} submissions{' '}
-						{team.hasValidSubmission
-							? '(Valid submission files)'
-							: '(Invalid submission files)'}
 						<ul>
 							{team.submissions.map(({id, fileName, submittedAt}) => (
 								<li key={id}>
@@ -466,9 +380,5 @@ export const getServerSideProps = withIronSessionSsr(async ({req}) => {
 			data.map((team) => parseTeamWithMembersAndSubmissionToJson(team)),
 		);
 
-	const jurys = await prisma.jury.findMany();
-
-	const controlPairs = await prisma.controlPair.findMany();
-
-	return {props: {teams, jurys, controlPairs}};
+	return {props: {teams}};
 }, sessionOptions);

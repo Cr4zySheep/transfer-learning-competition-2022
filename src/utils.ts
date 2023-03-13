@@ -1,11 +1,22 @@
 import crypto from 'node:crypto';
 import process from 'node:process';
-import {EvaluationCriteria, TeamMember} from '@prisma/client';
-import nodemailer from 'nodemailer';
+import {TeamMember} from '@prisma/client';
+import nodemailer, {Transport} from 'nodemailer';
 import {MAIL_SENDER, PARTICIPANT_SUBMISSION_DEADLINE} from 'consts';
-import axios from 'axios';
 import {toParisDateTime} from 'lib/utils.shared';
 import prisma from './db';
+
+// Const transport: Transport<{messageId: number}> = {
+// 	name: 'minimal',
+// 	version: '0.1.0',
+// 	send: (mail, callback) => {
+// 		const input = mail.message.createReadStream();
+// 		input.pipe(process.stdout);
+// 		input.on('end', function () {
+// 			callback(null, {messageId: 0});
+// 		});
+// 	},
+// };
 
 export function getMailTransport() {
 	return nodemailer.createTransport({
@@ -211,183 +222,4 @@ export async function generateResetPasswordConsentToken(): Promise<string> {
 	} while (isTaken);
 
 	return token;
-}
-
-export async function generateResetPasswordTokenJury(): Promise<string> {
-	let token: string;
-	let isTaken: boolean;
-	do {
-		token = crypto.randomBytes(32).toString('hex');
-		/* eslint-disable no-await-in-loop */
-		isTaken = await prisma.jury
-			.findMany({
-				where: {resetPasswordToken: token},
-				select: {id: true},
-				take: 1,
-			})
-			.then((data) => data.length > 0);
-		/* eslint-enable no-await-in-loop */
-	} while (isTaken);
-
-	return token;
-}
-
-export function evaluationCriteriaToLabel(criteria: EvaluationCriteria) {
-	if (criteria === EvaluationCriteria.CRITERIA_0) return 'realistic';
-	if (criteria === EvaluationCriteria.CRITERIA_1) return 'targeted';
-	return '';
-}
-
-export function labelToEvaluationCriteria(label: string) {
-	if (label === 'realistic') return EvaluationCriteria.CRITERIA_0;
-	if (label === 'targeted') return EvaluationCriteria.CRITERIA_1;
-
-	console.log('Unknown label:', label);
-	return EvaluationCriteria.CRITERIA_0;
-}
-
-export async function getControlPairs() {
-	const controlPairsData = await prisma.controlPair.findMany({});
-	const controlPairs = controlPairsData.map((controlPair) => ({
-		id: controlPair.id,
-		name: controlPair.name,
-		idTeamA: controlPair.idTeamA,
-		idTeamB: controlPair.idTeamB,
-		evaluationCriteria: evaluationCriteriaToLabel(
-			controlPair.evaluationCriteria,
-		),
-		criteria0:
-			controlPair.evaluationCriteria === EvaluationCriteria.CRITERIA_0
-				? controlPair.criteria
-				: null,
-		criteria1:
-			controlPair.evaluationCriteria === EvaluationCriteria.CRITERIA_1
-				? controlPair.criteria
-				: null,
-	}));
-
-	return controlPairs;
-}
-
-export async function getEvaluationDataForTeams() {
-	const evaluationData = await prisma.evaluation.findMany({
-		where: {
-			assignedTeamId: {not: null},
-			assignedJuryId: null,
-		},
-	});
-	const evaluations = evaluationData.map((evaluation) => ({
-		...evaluation,
-		evaluationCriteria: evaluationCriteriaToLabel(
-			evaluation.evaluationCriteria,
-		),
-	}));
-
-	return evaluations;
-}
-
-export async function getEvaluationDataForJury() {
-	const evaluationData = await prisma.evaluation.findMany({
-		where: {
-			assignedTeamId: null,
-			assignedJuryId: {not: null},
-		},
-	});
-	const evaluations = evaluationData.map((evaluation) => ({
-		...evaluation,
-		assignedJuryId: (evaluation.assignedJuryId ?? 1) - 1,
-		evaluationCriteria: evaluationCriteriaToLabel(
-			evaluation.evaluationCriteria,
-		),
-	}));
-
-	return evaluations;
-}
-
-interface EvaluationData {
-	name: string;
-	idTeamA: number;
-	idTeamB: number;
-	assignedTeamId: number;
-	assignedTeamMemberId: number;
-	evaluationCriteria: 'realistic' | 'targeted';
-}
-
-interface EvaluationJuryData {
-	name: string;
-	idTeamA: number;
-	idTeamB: number;
-	assignedJuryId: number;
-	evaluationCriteria: 'realistic' | 'targeted';
-}
-
-export async function replenishBufferForTeam(team: {
-	id: number;
-	memberId: number;
-}) {
-	const [controlPairs, evaluationData] = await Promise.all([
-		getControlPairs(),
-		getEvaluationDataForTeams(),
-	]);
-
-	const evaluationsData = await axios
-		.post<{evaluations: EvaluationData[]}>(
-			`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
-			{
-				teamId: team.id,
-				teamMemberId: team.memberId,
-				controlPairs,
-				evaluationData,
-			},
-		)
-		.then((response) => response.data.evaluations);
-
-	const data = {
-		data: evaluationsData.map((evaluationData) => ({
-			name: evaluationData.name,
-			idTeamA: evaluationData.idTeamA,
-			idTeamB: evaluationData.idTeamB,
-			assignedTeamId: evaluationData.assignedTeamId,
-			assignedTeamMemberId: evaluationData.assignedTeamMemberId,
-			evaluationCriteria: labelToEvaluationCriteria(
-				evaluationData.evaluationCriteria,
-			),
-			version: 0,
-		})),
-	};
-
-	await prisma.evaluation.createMany(data);
-}
-
-export async function replenishBufferForJury(juryId: number) {
-	const [controlPairs, evaluationData] = await Promise.all([
-		getControlPairs(),
-		getEvaluationDataForJury(),
-	]);
-
-	const evaluationsData = await axios
-		.post<{evaluations: EvaluationJuryData[]}>(
-			`${process.env.PYTHON_SERVER ?? ''}/evaluations`,
-			{
-				juryId: juryId - 1,
-				controlPairs,
-				evaluationData,
-			},
-		)
-		.then((response) => response.data.evaluations);
-
-	const data = {
-		data: evaluationsData.map((evaluationData) => ({
-			name: evaluationData.name,
-			idTeamA: evaluationData.idTeamA,
-			assignedJuryId: evaluationData.assignedJuryId + 1,
-			idTeamB: evaluationData.idTeamB,
-			evaluationCriteria: labelToEvaluationCriteria(
-				evaluationData.evaluationCriteria,
-			),
-			version: 0,
-		})),
-	};
-
-	await prisma.evaluation.createMany(data);
 }

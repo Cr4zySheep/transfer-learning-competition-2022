@@ -21,6 +21,5 @@ declare module 'iron-session' {
 			memberId: number;
 		};
 		admin?: boolean;
-		jury?: {id: number};
 	}
 }

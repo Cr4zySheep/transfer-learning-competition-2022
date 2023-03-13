@@ -40,19 +40,3 @@ export async function addNewTeamMember(values: NewTeamMember) {
 export async function deleteTeam(id: number) {
 	return axios.delete(`/api/admin/team/${id}`);
 }
-
-export async function syncValidSubmission() {
-	return axios
-		.get<TeamWithMembersAndSubmissionsJson[]>('/api/admin/team/valid-teams')
-		.then((response) => response.data);
-}
-
-export async function syncTop3() {
-	return axios
-		.get<TeamWithMembersAndSubmissionsJson[]>('/api/admin/team/get-top3')
-		.then((response) => response.data);
-}
-
-export async function syncTop1() {
-	return axios.get('/api/admin/team/get-top1');
-}
