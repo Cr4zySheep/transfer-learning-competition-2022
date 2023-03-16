@@ -33,6 +33,7 @@ import TeamMemberForm from 'components/templates/inscription/TeamMemberForm';
 import {teamMemberRegistration} from 'schemas/teamRegistration';
 import * as yup from 'yup';
 import prisma from 'db';
+import {toParisDateTime} from 'lib/utils.shared';
 
 const emptyMember = {
 	firstName: '',
@@ -279,7 +280,7 @@ const AdminPage: NextPage<AdminPageProps> = (props) => {
 						<ul>
 							{team.submissions.map(({id, fileName, submittedAt}) => (
 								<li key={id}>
-									{fileName} - {submittedAt.toLocaleDateString()}
+									{fileName} - {toParisDateTime(submittedAt)}
 								</li>
 							))}
 						</ul>

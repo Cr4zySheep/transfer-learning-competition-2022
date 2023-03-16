@@ -7,7 +7,7 @@ import schema, {
 	TeamMemberRegistration,
 	TeamRegistration,
 } from 'schemas/teamRegistration';
-import {generateEmailValidationToken, sendValidationEmail} from 'utils';
+import {generateEmailValidationToken, sendValidationEmail} from 'utils.server';
 import prisma from 'db';
 import {REGISTRATION_DEADLINE} from 'consts';
 

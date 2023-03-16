@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {Buffer} from 'node:buffer';
 import process from 'node:process';
-import {NB_MAX_SUBMISSIONS} from 'consts';
+import {NB_MAX_SUBMISSIONS, PARTICIPANT_SUBMISSION_DEADLINE} from 'consts';
 import busboy from 'busboy';
 import {NextApiRequest, NextApiResponse} from 'next';
 import {sessionOptions} from 'lib/session';
@@ -34,7 +34,7 @@ async function postSubmission(
 	const id = random();
 	const now = new Date();
 	const teamFolder = path.join(
-		process.env.SUBMISSION_PATH ?? '/data',
+		process.env.SUBMISSION_PATH ?? './data',
 		`team-${teamId}`,
 	);
 	const filename = path.join(teamFolder, `${now.toISOString()}_${id}`);
@@ -118,11 +118,18 @@ async function handler(request: NextApiRequest, response: NextApiResponse) {
 	// TODO: Check that team exists
 	if (!team) {
 		response.status(401).send('You should be logged in.');
+		return;
+	}
+
+	const now = new Date();
+	if (now > PARTICIPANT_SUBMISSION_DEADLINE) {
+		response.status(401).send('Submission are now closed.');
+		return;
 	}
 
 	switch (request.method) {
 		case 'POST':
-			await postSubmission(team!.id, request, response);
+			await postSubmission(team.id, request, response);
 			break;
 
 		default:

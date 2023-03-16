@@ -9,7 +9,7 @@ import {
 	sendResetPasswordConsentMail,
 	sendResetPasswordEmail,
 	sendResetPasswordInstructions,
-} from 'utils';
+} from 'utils.server';
 import prisma from 'db';
 
 const loginRoute = async (

@@ -17,22 +17,6 @@ app.prepare().then(() => {
 			// Be sure to pass `true` as the second argument to `url.parse`.
 			// This tells it to parse the query portion of the URL.
 			const parsedUrl = parse(request.url, true);
-			const {pathname, query} = parsedUrl;
-
-			if (pathname.startsWith('/media/')) {
-				const target = pathname.replace('/media/', '').replace('..', '');
-				const filePath = path.join(process.env.MEDIA_PATH, target);
-				const stat = fs.statSync(filePath);
-
-				response.writeHead(200, {
-					'Content-Length': stat.size,
-				});
-
-				const readStream = fs.createReadStream(filePath);
-				// We replaced all the event handlers with a simple call to readStream.pipe()
-				readStream.pipe(response);
-				return;
-			}
 
 			await handle(request, response, parsedUrl);
 		} catch (error) {

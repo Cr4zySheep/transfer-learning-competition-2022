@@ -1,5 +1,5 @@
 import {GetServerSideProps} from 'next';
-import {generateResetPasswordToken, sendResetPasswordEmail} from 'utils';
+import {generateResetPasswordToken, sendResetPasswordEmail} from 'utils.server';
 import prisma from 'db';
 
 const VerifyToken = () => {

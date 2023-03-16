@@ -4,7 +4,7 @@ import {ResetPasswordData, resetPasswordSchema} from 'schemas/auth';
 import validate from 'middlewares/validate';
 import {NextApiRequest, NextApiResponse} from 'next';
 import bcrypt from 'bcrypt';
-import {sendPasswordHasBeenChangedMail} from 'utils';
+import {sendPasswordHasBeenChangedMail} from 'utils.server';
 import prisma from 'db';
 
 const loginRoute = async (

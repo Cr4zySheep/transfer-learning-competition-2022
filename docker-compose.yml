@@ -8,8 +8,6 @@ services:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@database:3306/${MYSQL_DATABASE}
       - ADMIN_PASSWORD=SuperPasswordSecret
       - SUBMISSION_PATH
-      - MEDIA_PATH
-      - PYTHON_SERVER=http://python-api:5000
     ports:
       - 80:3000
     depends_on:
@@ -36,9 +34,6 @@ services:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@database:3306/${MYSQL_DATABASE}
     depends_on:
       - database
-
-  python-api:
-    image: tf-eval:$VERSION
 
 # Names our volume
 volumes:

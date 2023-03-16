@@ -1,8 +1,9 @@
 import crypto from 'node:crypto';
 import process from 'node:process';
 import {TeamMember} from '@prisma/client';
-import nodemailer, {Transport} from 'nodemailer';
-import {MAIL_SENDER, PARTICIPANT_SUBMISSION_DEADLINE} from 'consts';
+import nodemailer /* , {Transport} */ from 'nodemailer';
+import {MAIL_SENDER} from 'consts.server';
+import {PARTICIPANT_SUBMISSION_DEADLINE} from 'consts';
 import {toParisDateTime} from 'lib/utils.shared';
 import prisma from './db';
 
